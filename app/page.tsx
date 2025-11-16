@@ -1,304 +1,669 @@
 "use client";
 
-import { useUploadThing } from "@/lib/uploadthing";
-import Image from "next/image";
-import { useEffect, useState } from "react";
-import { useDropzone } from "react-dropzone";
+import { useEffect, useState, useMemo } from "react";
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import DocumentCard, { DocumentMetadata } from "./components/DocumentCard";
+import DocumentsList from "./components/DocumentsList";
+import DocumentPreviewList from "./components/DocumentPreviewList";
+import FilterBar from "./components/FilterBar";
+import EnhancedDocumentViewer from "./components/EnhancedDocumentViewer";
+import EnhancedUploadModal from "./components/EnhancedUploadModal";
+import CreateFolderModal from "./components/CreateFolderModal";
+import FolderCard from "./components/FolderCard";
+import BulkActionsBar from "./components/BulkActionsBar";
+import { ChevronRight } from "lucide-react";
 
-type Upload = {
+interface FolderType {
   id: string;
   name: string;
-  url: string;
-  fileType: string;
-};
+  parentId?: string;
+  color?: string;
+}
 
 export default function Home() {
-  const [preview, setPreview] = useState<string | null>(null);
-  const [file, setFile] = useState<File | null>(null);
-  const [progress, setProgress] = useState(0);
-  const [uploads, setUploads] = useState<Upload[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-
-  const { startUpload, isUploading } = useUploadThing("mediaUploader", {
-    onClientUploadComplete: () => {
-      setFile(null);
-      setPreview(null);
-      setProgress(0);
-      fetchUploads();
-    },
-    onUploadProgress: setProgress,
-  });
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    maxFiles: 1,
-    onDrop: (files) => {
-      const f = files[0];
-      if (f) {
-        setPreview(URL.createObjectURL(f));
-        setFile(f);
-      }
-    },
-  });
+  const [uploads, setUploads] = useState<DocumentMetadata[]>([]);
+  const [folders, setFolders] = useState<FolderType[]>([]);
+  const [currentFolder, setCurrentFolder] = useState<string | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<DocumentMetadata | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'preview'>('grid');
+  const [sortBy, setSortBy] = useState<string>('date-desc');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedDocType, setSelectedDocType] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showCreateFolderModal, setShowCreateFolderModal] = useState(false);
+  const [itemsPerPage, setItemsPerPage] = useState(20);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
+  const [selectionMode, setSelectionMode] = useState(false);
 
   const fetchUploads = async () => {
-    const res = await fetch("/api/uploads");
-    setUploads(await res.json());
+    try {
+      const res = await fetch("/api/uploads");
+      const data = await res.json();
+      
+      const transformedData: DocumentMetadata[] = data.map((upload: any, index: number) => ({
+        ...upload,
+        tags: upload.tags || [], // Use tags from database, default to empty array
+        documentType: generateDocumentType(upload.fileType),
+        referenceNumber: `#${1999 + index}`,
+      }));
+      
+      setUploads(transformedData);
+    } catch (error) {
+      console.error("Failed to fetch uploads:", error);
+    }
   };
 
-  const deleteFile = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this file?")) return;
-    
+  const fetchFolders = async () => {
     try {
-      const res = await fetch(`/api/uploads/${id}`, { method: "DELETE" });
+      const res = await fetch("/api/folders");
+      const data = await res.json();
+      setFolders(data);
+    } catch (error) {
+      console.error("Failed to fetch folders:", error);
+    }
+  };
+
+  const generateDocumentType = (fileType: string): string => {
+    if (fileType.includes('pdf')) return 'PDF';
+    if (fileType.includes('image')) return 'Image';
+    if (fileType.includes('word') || fileType.includes('document')) return 'Word Document';
+    if (fileType.includes('sheet') || fileType.includes('excel')) return 'Spreadsheet';
+    if (fileType.includes('epub')) return 'EPUB';
+    return 'Document';
+  };
+
+  const availableTags = useMemo(() => {
+    const tags = new Set<string>();
+    uploads.forEach(doc => doc.tags?.forEach(tag => tags.add(tag)));
+    return Array.from(tags).sort();
+  }, [uploads]);
+
+  const availableDocTypes = useMemo(() => {
+    const types = new Set<string>();
+    uploads.forEach(doc => {
+      if (doc.documentType) types.add(doc.documentType);
+    });
+    return Array.from(types).sort();
+  }, [uploads]);
+
+  // Filter documents by folder and other criteria
+  const filteredDocuments = useMemo(() => {
+    let filtered = uploads.filter(doc => doc.folderId === currentFolder);
+
+    if (searchQuery) {
+      filtered = filtered.filter(doc =>
+        doc.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    if (selectedTags.length > 0) {
+      filtered = filtered.filter(doc =>
+        doc.tags?.some(tag => selectedTags.includes(tag))
+      );
+    }
+
+    if (selectedDocType) {
+      filtered = filtered.filter(doc => doc.documentType === selectedDocType);
+    }
+
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'name-asc':
+          return a.name.localeCompare(b.name);
+        case 'name-desc':
+          return b.name.localeCompare(a.name);
+        case 'date-desc':
+          return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+        case 'date-asc':
+          return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+        case 'size-desc':
+          return (b.fileSize || 0) - (a.fileSize || 0);
+        case 'size-asc':
+          return (a.fileSize || 0) - (b.fileSize || 0);
+        default:
+          return 0;
+      }
+    });
+
+    return filtered;
+  }, [uploads, currentFolder, searchQuery, selectedTags, selectedDocType, sortBy]);
+
+  // Pagination
+  const totalPages = Math.ceil(filteredDocuments.length / itemsPerPage);
+  const paginatedDocuments = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    return filteredDocuments.slice(start, end);
+  }, [filteredDocuments, currentPage, itemsPerPage]);
+
+  // Get folders in current directory
+  const currentFolders = useMemo(() => {
+    return folders.filter(f => f.parentId === currentFolder);
+  }, [folders, currentFolder]);
+
+  const handlePreview = (id: string) => {
+    const doc = uploads.find(u => u.id === id);
+    if (doc) setSelectedDocument(doc);
+  };
+
+  const handleDelete = async (id: string) => {
+    console.log('handleDelete called with id:', id);
+    
+    // Use window.confirm explicitly for better cross-browser compatibility
+    const confirmed = window.confirm('Are you sure you want to delete this document?');
+    console.log('Confirm result:', confirmed);
+    
+    if (!confirmed) {
+      console.log('User cancelled delete');
+      return;
+    }
+    
+    console.log('Sending DELETE request to /api/uploads/' + id);
+    try {
+      const res = await fetch(`/api/uploads/${id}`, { 
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        cache: 'no-store',
+        // Firefox-specific: ensure no caching
+        mode: 'cors',
+        credentials: 'same-origin'
+      });
+      
+      console.log('Response status:', res.status);
+      
+      if (!res.ok) {
+        const data = await res.json();
+        console.error('Delete failed:', data);
+        alert(`Failed to delete file: ${data.error || 'Unknown error'}`);
+        return;
+      }
+      
+      const data = await res.json();
+      console.log('Response data:', data);
+      console.log('File deleted successfully');
+      
+      // Update local state immediately without refetching
+      setUploads(prev => prev.filter(u => u.id !== id));
+      
+    } catch (error) {
+      console.error('Failed to delete document:', error);
+      alert('Failed to delete file. Please try again.');
+    }
+  };
+
+  const handleDownload = (id: string) => {
+    const doc = uploads.find(u => u.id === id);
+    if (doc) window.open(doc.url, '_blank');
+  };
+
+  const handleEdit = (id: string) => {
+    // For now, just open the document viewer
+    // In a full implementation, this would open an editor
+    const doc = uploads.find(u => u.id === id);
+    if (doc) {
+      alert(`Edit functionality for ${doc.name} will be implemented soon.`);
+    }
+  };
+
+  const handleCreateFolder = async (name: string, color?: string) => {
+    console.log('Creating folder:', name, 'with color:', color);
+    try {
+      const res = await fetch('/api/folders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, parentId: currentFolder, color })
+      });
+      if (res.ok) {
+        console.log('Folder created successfully');
+        await fetchFolders();
+      } else {
+        const data = await res.json();
+        console.error('Failed to create folder:', data);
+        alert('Failed to create folder: ' + (data.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Failed to create folder:', error);
+      alert('Failed to create folder. Please try again.');
+    }
+  };
+
+  const handleResetFilters = () => {
+    setSelectedTags([]);
+    setSelectedDocType('');
+    setSortBy('date-desc');
+    setSearchQuery('');
+  };
+
+  const handleMoveFile = async (fileId: string, folderId: string) => {
+    try {
+      const res = await fetch('/api/uploads/move', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileId, folderId })
+      });
       if (res.ok) {
         fetchUploads();
       }
     } catch (error) {
-      console.error("Failed to delete file:", error);
+      console.error('Failed to move file:', error);
     }
   };
 
-  const filteredUploads = uploads.filter((u) =>
-    u.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const handleDeleteFolder = async (folderId: string, fileCount: number) => {
+    console.log('handleDeleteFolder called with folderId:', folderId, 'fileCount:', fileCount);
+    
+    let confirmed;
+    if (fileCount > 0) {
+      confirmed = window.confirm(
+        `This folder contains ${fileCount} file${fileCount > 1 ? 's' : ''}. Deleting this folder will also delete all files inside it. Are you sure you want to continue?`
+      );
+    } else {
+      confirmed = window.confirm('Are you sure you want to delete this folder?');
+    }
+    
+    console.log('Confirm result:', confirmed);
+    if (!confirmed) {
+      console.log('User cancelled folder delete');
+      return;
+    }
+
+    console.log('Sending DELETE request to /api/folders/' + folderId);
+    try {
+      const res = await fetch(`/api/folders/${folderId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        cache: 'no-store',
+        mode: 'cors',
+        credentials: 'same-origin'
+      });
+      console.log('Folder delete response status:', res.status);
+      
+      if (!res.ok) {
+        const data = await res.json();
+        console.error('Folder delete failed:', data);
+        alert('Failed to delete folder: ' + (data.error || 'Unknown error'));
+        return;
+      }
+      
+      const data = await res.json();
+      console.log('Folder delete response data:', data);
+      console.log('Folder deleted successfully');
+      
+      // Update local state immediately
+      setFolders(prev => prev.filter(f => f.id !== folderId));
+      if (currentFolder === folderId) {
+        setCurrentFolder(null);
+      }
+      
+      // Refresh uploads to show files that were in the deleted folder
+      await fetchUploads();
+      
+    } catch (error) {
+      console.error('Failed to delete folder:', error);
+      alert('Failed to delete folder. Please try again.');
+    }
+  };
+
+  // Bulk selection handlers
+  const toggleFileSelection = (fileId: string) => {
+    setSelectedFiles(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(fileId)) {
+        newSet.delete(fileId);
+      } else {
+        newSet.add(fileId);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedFiles.size === paginatedDocuments.length) {
+      setSelectedFiles(new Set());
+    } else {
+      setSelectedFiles(new Set(paginatedDocuments.map(doc => doc.id)));
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedFiles.size === 0) return;
+    
+    const confirmed = window.confirm(
+      `Are you sure you want to delete ${selectedFiles.size} file${selectedFiles.size > 1 ? 's' : ''}?`
+    );
+    
+    if (!confirmed) return;
+
+    try {
+      await Promise.all(
+        Array.from(selectedFiles).map(fileId =>
+          fetch(`/api/uploads/${fileId}`, { method: 'DELETE' })
+        )
+      );
+      
+      setSelectedFiles(new Set());
+      setSelectionMode(false);
+      await fetchUploads();
+    } catch (error) {
+      console.error('Failed to delete files:', error);
+      alert('Failed to delete some files. Please try again.');
+    }
+  };
+
+  const handleBulkMove = async (targetFolderId: string | null) => {
+    if (selectedFiles.size === 0) return;
+
+    try {
+      await Promise.all(
+        Array.from(selectedFiles).map(fileId =>
+          fetch('/api/uploads/move', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fileId, folderId: targetFolderId })
+          })
+        )
+      );
+      
+      setSelectedFiles(new Set());
+      setSelectionMode(false);
+      await fetchUploads();
+    } catch (error) {
+      console.error('Failed to move files:', error);
+      alert('Failed to move some files. Please try again.');
+    }
+  };
+
+  const handleBulkCopy = async (targetFolderId: string | null) => {
+    if (selectedFiles.size === 0) return;
+
+    try {
+      const filesToCopy = uploads.filter(u => selectedFiles.has(u.id));
+      
+      await Promise.all(
+        filesToCopy.map(file =>
+          fetch('/api/uploads/copy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              url: file.url,
+              name: `${file.name} (copy)`,
+              fileType: file.fileType,
+              fileSize: file.fileSize,
+              folderId: targetFolderId,
+              tags: file.tags
+            })
+          })
+        )
+      );
+      
+      setSelectedFiles(new Set());
+      setSelectionMode(false);
+      await fetchUploads();
+    } catch (error) {
+      console.error('Failed to copy files:', error);
+      alert('Failed to copy some files. Please try again.');
+    }
+  };
 
   useEffect(() => {
     fetchUploads();
+    fetchFolders();
   }, []);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [itemsPerPage, searchQuery, selectedTags, selectedDocType, currentFolder]);
+
+  const breadcrumbs = useMemo(() => {
+    const crumbs: FolderType[] = [];
+    let folderId = currentFolder;
+    
+    while (folderId) {
+      const folder = folders.find(f => f.id === folderId);
+      if (folder) {
+        crumbs.unshift(folder);
+        folderId = folder.parentId || null;
+      } else {
+        break;
+      }
+    }
+    
+    return crumbs;
+  }, [currentFolder, folders]);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold text-gray-900">File Upload Center</h1>
-          <p className="text-gray-600">Upload and manage your files with ease</p>
+    <DndProvider backend={HTML5Backend}>
+      <div className="min-h-screen" style={{ backgroundColor: '#F7F8FA' }}>
+        <main className="w-full">
+        {/* Header */}
+        <div className="bg-white px-8 pt-5 pb-3">
+          <h1 className="text-2xl font-semibold text-gray-900">Documents</h1>
         </div>
 
-        <div
-          {...getRootProps()}
-          className={`border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all shadow-sm ${
-            isDragActive
-              ? "border-blue-500 bg-blue-50 scale-105"
-              : "border-gray-300 bg-white hover:border-blue-400 hover:bg-gray-50"
-          }`}
-        >
-          <input {...getInputProps()} />
-          {!preview ? (
-            <div className="space-y-3">
-              <div className="text-6xl">📁</div>
-              <p className="text-lg font-medium text-gray-900">
-                Drag and drop or click to select any file
-              </p>
-              <p className="text-sm text-gray-500">
-                Supports images, videos, PDFs, documents, and more
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {file?.type.startsWith("image/") ? (
-                <Image
-                  src={preview}
-                  alt="Preview"
-                  width={400}
-                  height={200}
-                  className="max-h-64 mx-auto rounded"
-                />
-              ) : file?.type.startsWith("video/") ? (
-                <video
-                  src={preview}
-                  controls
-                  className="max-h-64 mx-auto rounded"
-                />
-              ) : file?.type === "application/pdf" ? (
-                <iframe
-                  src={preview}
-                  className="w-full h-96 rounded border"
-                  title="PDF Preview"
-                />
-              ) : (
-                <div className="flex flex-col items-center space-y-2">
-                  <div className="text-6xl">📄</div>
-                  <p className="text-sm font-medium text-gray-900">{file?.type || "Unknown type"}</p>
-                </div>
-              )}
-              <p className="text-base font-semibold text-gray-900">{file?.name}</p>
-              <p className="text-sm text-gray-600">{((file?.size || 0) / 1024 / 1024).toFixed(2)} MB</p>
-            </div>
-          )}
-        </div>
+        {/* Filter Bar */}
+        <FilterBar 
+          totalCount={filteredDocuments.length}
+          onResetFilters={handleResetFilters}
+          onSortChange={setSortBy}
+          onViewChange={setViewMode}
+          currentView={viewMode}
+          onTagsFilter={setSelectedTags}
+          onDocTypeFilter={setSelectedDocType}
+          availableTags={availableTags}
+          availableDocTypes={availableDocTypes}
+          onSearchChange={setSearchQuery}
+          searchQuery={searchQuery}
+          onUploadClick={() => setShowUploadModal(true)}
+          onCreateFolderClick={() => setShowCreateFolderModal(true)}
+          itemsPerPage={itemsPerPage}
+          onItemsPerPageChange={setItemsPerPage}
+        />
 
-        {file && !isUploading && (
-          <button
-            onClick={() => startUpload([file])}
-            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-          >
-            Upload File
-          </button>
-        )}
-
-        {isUploading && (
-          <div className="bg-white rounded-xl p-6 shadow-lg space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-900">Uploading...</span>
-              <span className="text-sm font-bold text-blue-600">{progress}%</span>
-            </div>
-            <div className="relative h-3 bg-gray-200 rounded-full overflow-hidden">
-              <div
-                className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 rounded-full transition-all duration-300 ease-out"
-                style={{ width: `${progress}%` }}
-              >
-                <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
-              </div>
-            </div>
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-              <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-              <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-            </div>
-          </div>
-        )}
-
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-900">Files Gallery</h2>
-            <div className="flex items-center gap-2">
+        {/* Breadcrumbs */}
+        {breadcrumbs.length > 0 && (
+          <div className="bg-white px-8 py-2 border-b border-gray-200">
+            <div className="flex items-center gap-2 text-sm">
               <button
-                onClick={() => setViewMode("grid")}
-                className={`p-2 rounded-lg transition-colors ${
-                  viewMode === "grid" ? "bg-blue-100 text-blue-600" : "text-gray-400 hover:text-gray-600"
-                }`}
+                onClick={() => setCurrentFolder(null)}
+                className="text-blue-600 hover:underline"
               >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M3 4a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 12a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H4a1 1 0 01-1-1v-4zM11 4a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V4zM11 12a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/>
-                </svg>
+                All Files
               </button>
-              <button
-                onClick={() => setViewMode("list")}
-                className={`p-2 rounded-lg transition-colors ${
-                  viewMode === "list" ? "bg-blue-100 text-blue-600" : "text-gray-400 hover:text-gray-600"
-                }`}
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search for files"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
-            />
-            <svg className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-
-          {filteredUploads.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="flex justify-center mb-4">
-                <div className="relative">
-                  <div className="text-6xl">📁</div>
-                  <div className="absolute -right-2 -top-2 text-4xl">📄</div>
-                  <div className="absolute -left-2 top-4 text-3xl">🎨</div>
-                  <div className="absolute right-4 top-8 text-2xl">👋</div>
-                </div>
-              </div>
-              <p className="text-gray-900 font-medium mb-1">No files were found.</p>
-              <p className="text-sm text-gray-500">
-                Please upload files to any item's files column, gallery or updates so they will be displayed here.
-              </p>
-            </div>
-          ) : (
-            <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" : "space-y-2"}>
-              {filteredUploads.map((u) => (
-                <div key={u.id} className={viewMode === "grid" ? "bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition-all group relative" : "bg-gray-50 rounded-lg p-3 hover:bg-gray-100 transition-all group flex items-center gap-3"}>
+              {breadcrumbs.map((crumb, index) => (
+                <div key={crumb.id} className="flex items-center gap-2">
+                  <ChevronRight className="w-4 h-4 text-gray-400" />
                   <button
-                    onClick={() => deleteFile(u.id)}
-                    className="absolute top-2 right-2 p-1.5 bg-white rounded-lg shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 z-10"
-                    title="Delete file"
+                    onClick={() => setCurrentFolder(crumb.id)}
+                    className={`${
+                      index === breadcrumbs.length - 1
+                        ? 'text-gray-900 font-medium'
+                        : 'text-blue-600 hover:underline'
+                    }`}
                   >
-                    <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
+                    {crumb.name}
                   </button>
-                  
-                  {viewMode === "grid" ? (
-                    <>
-                      {u.fileType.startsWith("image/") ? (
-                        <Image
-                          src={u.url}
-                          alt={u.name}
-                          width={400}
-                          height={200}
-                          className="w-full h-32 object-cover rounded"
-                        />
-                      ) : u.fileType.startsWith("video/") ? (
-                        <video
-                          src={u.url}
-                          className="w-full h-32 object-cover rounded"
-                        />
-                      ) : u.fileType === "application/pdf" ? (
-                        <a href={u.url} target="_blank" rel="noopener noreferrer" className="block">
-                          <div className="w-full h-32 bg-red-50 rounded flex items-center justify-center">
-                            <div className="text-center">
-                              <div className="text-4xl mb-2">📄</div>
-                              <p className="text-xs text-red-600">PDF</p>
-                            </div>
-                          </div>
-                        </a>
-                      ) : (
-                        <a href={u.url} target="_blank" rel="noopener noreferrer" className="block">
-                          <div className="w-full h-32 bg-gray-50 rounded flex items-center justify-center">
-                            <div className="text-center">
-                              <div className="text-4xl mb-2">📎</div>
-                              <p className="text-xs text-gray-600">{u.fileType.split("/")[1]?.toUpperCase() || "FILE"}</p>
-                            </div>
-                          </div>
-                        </a>
-                      )}
-                      <p className="text-sm mt-3 truncate font-medium text-gray-900">{u.name}</p>
-                    </>
-                  ) : (
-                    <>
-                      <div className="flex-shrink-0">
-                        {u.fileType.startsWith("image/") ? (
-                          <div className="w-10 h-10 bg-blue-100 rounded flex items-center justify-center text-xl">🖼️</div>
-                        ) : u.fileType.startsWith("video/") ? (
-                          <div className="w-10 h-10 bg-purple-100 rounded flex items-center justify-center text-xl">🎥</div>
-                        ) : u.fileType === "application/pdf" ? (
-                          <div className="w-10 h-10 bg-red-100 rounded flex items-center justify-center text-xl">📄</div>
-                        ) : (
-                          <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center text-xl">📎</div>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">{u.name}</p>
-                        <p className="text-xs text-gray-500">{u.fileType}</p>
-                      </div>
-                      <a
-                        href={u.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-shrink-0 text-blue-600 hover:text-blue-700"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                      </a>
-                    </>
-                  )}
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Content */}
+        <section className="p-8">
+          {/* Folders */}
+          {currentFolders.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-1.5">
+                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                </svg>
+                Folders
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-2">
+                {currentFolders.map(folder => {
+                  const fileCount = uploads.filter(u => u.folderId === folder.id).length;
+                  return (
+                    <FolderCard
+                      key={folder.id}
+                      id={folder.id}
+                      name={folder.name}
+                      color={folder.color}
+                      fileCount={fileCount}
+                      onClick={() => setCurrentFolder(folder.id)}
+                      onMoveFile={handleMoveFile}
+                      onDelete={handleDeleteFolder}
+                    />
+                  );
+                })}
+              </div>
+            </div>
           )}
-        </div>
+
+          {/* Documents */}
+          {paginatedDocuments.length === 0 && currentFolders.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <div className="text-7xl mb-4">📁</div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">No documents found</h3>
+              <p className="text-gray-600">
+                {uploads.length === 0
+                  ? 'Upload your first document to get started'
+                  : 'Try adjusting your filters or navigate to a different folder'
+                }
+              </p>
+            </div>
+          ) : paginatedDocuments.length > 0 ? (
+            <>
+              {currentFolders.length > 0 && (
+                <h3 className="text-sm font-medium text-gray-700 mb-3 mt-6">Files</h3>
+              )}
+              {viewMode === 'grid' ? (
+                <div className="grid grid-cols-1 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-8 gap-3">
+                  {paginatedDocuments.map((doc) => (
+                    <DocumentCard
+                      key={doc.id}
+                      doc={doc}
+                      onPreview={handlePreview}
+                      onDelete={handleDelete}
+                      onDownload={handleDownload}
+                      onEdit={handleEdit}
+                    />
+                  ))}
+                </div>
+              ) : viewMode === 'preview' ? (
+                <DocumentPreviewList
+                  documents={paginatedDocuments}
+                  onPreview={handlePreview}
+                  onDelete={handleDelete}
+                  onDownload={handleDownload}
+                  onEdit={handleEdit}
+                />
+              ) : (
+                <DocumentsList
+                  documents={paginatedDocuments}
+                  onPreview={handlePreview}
+                  onDelete={handleDelete}
+                  onDownload={handleDownload}
+                  selectionMode={true}
+                  selectedFiles={selectedFiles}
+                  onToggleSelect={toggleFileSelection}
+                  onToggleSelectAll={toggleSelectAll}
+                />
+              )}
+            </>
+          ) : null}
+        </section>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="px-8 pb-8 flex items-center justify-center gap-1">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-2 py-0.5 text-xs border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50"
+            >
+              «
+            </button>
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              let pageNum;
+              if (totalPages <= 5) {
+                pageNum = i + 1;
+              } else if (currentPage <= 3) {
+                pageNum = i + 1;
+              } else if (currentPage >= totalPages - 2) {
+                pageNum = totalPages - 4 + i;
+              } else {
+                pageNum = currentPage - 2 + i;
+              }
+              
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => setCurrentPage(pageNum)}
+                  className={`px-2.5 py-0.5 text-xs rounded ${
+                    currentPage === pageNum
+                      ? 'bg-green-600 text-white'
+                      : 'border border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-2 py-0.5 text-xs border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50"
+            >
+              »
+            </button>
+          </div>
+        )}
+      </main>
+
+      {/* Bulk Actions Bar */}
+      {selectedFiles.size > 0 && viewMode === 'list' && (
+        <BulkActionsBar
+          selectedCount={selectedFiles.size}
+          onDelete={handleBulkDelete}
+          onMove={handleBulkMove}
+          onCopy={handleBulkCopy}
+          onCancel={() => {
+            setSelectedFiles(new Set());
+          }}
+          folders={folders}
+          currentFolder={currentFolder}
+        />
+      )}
+
+      {/* Modals */}
+      {showUploadModal && (
+        <EnhancedUploadModal
+          onClose={() => setShowUploadModal(false)}
+          onUploadComplete={fetchUploads}
+        />
+      )}
+
+      {showCreateFolderModal && (
+        <CreateFolderModal
+          onClose={() => setShowCreateFolderModal(false)}
+          onCreateFolder={handleCreateFolder}
+        />
+      )}
+
+      {selectedDocument && (
+        <EnhancedDocumentViewer
+          document={selectedDocument}
+          onClose={() => setSelectedDocument(null)}
+        />
+      )}
       </div>
-    </div>
+    </DndProvider>
   );
 }

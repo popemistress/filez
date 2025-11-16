@@ -6,10 +6,10 @@ const utapi = new UTApi();
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // Get file info from database
     const result = await pool.query(
