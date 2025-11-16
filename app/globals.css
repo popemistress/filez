@@ -95,3 +95,11 @@ body {
   background: #f9fafb;
   border-color: #d1d5db;
 }
+
+/* Hide Jodit branding */
+.jodit-status-bar__item-right,
+.jodit-status-bar a[href*="xdsoft"],
+.jodit-status-bar a[title*="Jodit"],
+.jodit-powered-by {
+  display: none !important;
+}

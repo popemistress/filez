@@ -4,6 +4,31 @@ import { UTApi } from "uploadthing/server";
 
 const utapi = new UTApi();
 
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const { url } = await request.json();
+
+    if (!url) {
+      return NextResponse.json({ error: "URL is required" }, { status: 400 });
+    }
+
+    // Update the file URL in database
+    await pool.query(
+      'UPDATE uploads SET url = $1 WHERE id = $2',
+      [url, id]
+    );
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error updating file:', error);
+    return NextResponse.json({ error: "Failed to update file" }, { status: 500 });
+  }
+}
+
 export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
