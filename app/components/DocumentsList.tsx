@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Eye, Trash2, Download, Calendar, Hash, GripVertical } from 'lucide-react';
+import { Eye, Trash2, Download, Calendar } from 'lucide-react';
 import { DocumentMetadata } from './DocumentCard';
 import Tag from './Tag';
 import { useDrag } from 'react-dnd';
@@ -108,10 +108,6 @@ export default function DocumentsList({ documents, onPreview, onDelete, onDownlo
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-gray-900 truncate">{doc.name}</p>
-                <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
-                  <Hash className="w-3 h-3" />
-                  <span>{doc.referenceNumber || `#${doc.id.slice(0, 6)}`}</span>
-                </div>
               </div>
             </div>
 
