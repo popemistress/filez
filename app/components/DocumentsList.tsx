@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Eye, Trash2, Download, Calendar } from 'lucide-react';
+import { Eye, Trash2, Download, Calendar, Share2 } from 'lucide-react';
 import { DocumentMetadata } from './DocumentCard';
 import Tag from './Tag';
 import { useDrag } from 'react-dnd';
@@ -11,13 +11,14 @@ interface DocumentsListProps {
   onPreview?: (id: string) => void;
   onDelete?: (id: string) => void;
   onDownload?: (id: string) => void;
+  onShare?: (id: string) => void;
   selectionMode?: boolean;
   selectedFiles?: Set<string>;
   onToggleSelect?: (id: string) => void;
   onToggleSelectAll?: () => void;
 }
 
-export default function DocumentsList({ documents, onPreview, onDelete, onDownload, selectionMode, selectedFiles, onToggleSelect, onToggleSelectAll }: DocumentsListProps) {
+export default function DocumentsList({ documents, onPreview, onDelete, onDownload, onShare, selectionMode, selectedFiles, onToggleSelect, onToggleSelectAll }: DocumentsListProps) {
   const getTagVariant = (tag: string, index: number) => {
     const variants = ['blue', 'purple', 'orange', 'green', 'pink', 'indigo'] as const;
     const hash = tag.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
@@ -56,7 +57,7 @@ export default function DocumentsList({ documents, onPreview, onDelete, onDownlo
         <div className="w-32 flex-shrink-0">Tags</div>
         <div className="w-24 flex-shrink-0">Type</div>
         <div className="w-28 flex-shrink-0">Date</div>
-        <div className="w-24 flex-shrink-0 text-right">Actions</div>
+        <div className="w-32 flex-shrink-0 text-right">Actions</div>
       </div>
 
       {/* Rows */}
@@ -135,7 +136,7 @@ export default function DocumentsList({ documents, onPreview, onDelete, onDownlo
             </div>
 
             {/* Actions */}
-            <div className="w-24 flex-shrink-0 flex items-center justify-end gap-2">
+            <div className="w-32 flex-shrink-0 flex items-center justify-end gap-2">
               {onPreview && (
                 <button
                   onClick={() => onPreview(doc.id)}
@@ -165,6 +166,15 @@ export default function DocumentsList({ documents, onPreview, onDelete, onDownlo
                   title="Download"
                 >
                   <Download className="w-4 h-4 text-gray-600" />
+                </button>
+              )}
+              {onShare && (
+                <button
+                  onClick={() => onShare(doc.id)}
+                  className="p-1.5 hover:bg-gray-200 rounded transition-colors"
+                  title="Share"
+                >
+                  <Share2 className="w-4 h-4 text-gray-600" />
                 </button>
               )}
             </div>

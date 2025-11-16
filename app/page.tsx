@@ -12,6 +12,7 @@ import EnhancedUploadModal from "./components/EnhancedUploadModal";
 import CreateFolderModal from "./components/CreateFolderModal";
 import FolderCard from "./components/FolderCard";
 import BulkActionsBar from "./components/BulkActionsBar";
+import ShareFileModal from "./components/ShareFileModal";
 import { ChevronRight } from "lucide-react";
 
 interface FolderType {
@@ -37,6 +38,7 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
   const [selectionMode, setSelectionMode] = useState(false);
+  const [shareFile, setShareFile] = useState<DocumentMetadata | null>(null);
 
   const fetchUploads = async () => {
     try {
@@ -199,6 +201,11 @@ export default function Home() {
   const handleDownload = (id: string) => {
     const doc = uploads.find(u => u.id === id);
     if (doc) window.open(doc.url, '_blank');
+  };
+
+  const handleShare = (id: string) => {
+    const doc = uploads.find(u => u.id === id);
+    if (doc) setShareFile(doc);
   };
 
   const handleEdit = (id: string) => {
@@ -553,6 +560,7 @@ export default function Home() {
                       onDelete={handleDelete}
                       onDownload={handleDownload}
                       onEdit={handleEdit}
+                      onShare={handleShare}
                     />
                   ))}
                 </div>
@@ -563,6 +571,7 @@ export default function Home() {
                   onDelete={handleDelete}
                   onDownload={handleDownload}
                   onEdit={handleEdit}
+                  onShare={handleShare}
                 />
               ) : (
                 <DocumentsList
@@ -574,6 +583,7 @@ export default function Home() {
                   selectedFiles={selectedFiles}
                   onToggleSelect={toggleFileSelection}
                   onToggleSelectAll={toggleSelectAll}
+                  onShare={handleShare}
                 />
               )}
             </>
@@ -661,6 +671,14 @@ export default function Home() {
         <EnhancedDocumentViewer
           document={selectedDocument}
           onClose={() => setSelectedDocument(null)}
+        />
+      )}
+
+      {shareFile && (
+        <ShareFileModal
+          file={shareFile}
+          onClose={() => setShareFile(null)}
+          onUpdate={fetchUploads}
         />
       )}
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Eye, Trash2, Download, Edit, Calendar } from 'lucide-react';
+import { Eye, Trash2, Download, Edit, Calendar, Share2 } from 'lucide-react';
 import { DocumentMetadata } from './DocumentCard';
 import Tag from './Tag';
 import { useDrag } from 'react-dnd';
@@ -12,13 +12,14 @@ interface DocumentPreviewListProps {
   onPreview?: (id: string) => void;
   onDelete?: (id: string) => void;
   onDownload?: (id: string) => void;
+  onShare?: (id: string) => void;
   selectionMode?: boolean;
   selectedFiles?: Set<string>;
   onToggleSelect?: (id: string) => void;
   onEdit?: (id: string) => void;
 }
 
-export default function DocumentPreviewList({ documents, onPreview, onDelete, onDownload, selectionMode, selectedFiles, onToggleSelect, onEdit }: DocumentPreviewListProps) {
+export default function DocumentPreviewList({ documents, onPreview, onDelete, onDownload, onShare, selectionMode, selectedFiles, onToggleSelect, onEdit }: DocumentPreviewListProps) {
   const [excerpts, setExcerpts] = useState<{ [key: string]: string }>({});
 
   // Extract text from documents
@@ -246,6 +247,16 @@ export default function DocumentPreviewList({ documents, onPreview, onDelete, on
                       >
                         <Download className="w-3.5 h-3.5" />
                         Download
+                      </button>
+                    )}
+                    {onShare && (
+                      <button
+                        onClick={() => onShare(doc.id)}
+                        className="px-3 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 rounded flex items-center gap-1.5 transition-colors"
+                        title="Share"
+                      >
+                        <Share2 className="w-3.5 h-3.5" />
+                        Share
                       </button>
                     )}
                   </div>

@@ -3,22 +3,22 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Tag from './Tag';
-import { Eye, Download, Trash2, Edit, FileText } from 'lucide-react';
+import { Eye, Download, Trash2, Edit, FileText, Share2 } from 'lucide-react';
 import { useDrag } from 'react-dnd';
 
-export type DocumentMetadata = {
+export interface DocumentMetadata {
   id: string;
   name: string;
   url: string;
   fileType: string;
-  fileSize?: number;
+  fileSize: number;
   createdAt?: string;
-  tags?: string[];
-  correspondent?: string;
   documentType?: string;
-  storagePath?: string;
+  tags?: string[];
   referenceNumber?: string;
   folderId?: string | null;
+  isPublic?: boolean;
+  shareToken?: string | null;
 };
 
 interface DocumentCardProps {
@@ -27,12 +27,13 @@ interface DocumentCardProps {
   onDelete?: (id: string) => void;
   onDownload?: (id: string) => void;
   onEdit?: (id: string) => void;
+  onShare?: (id: string) => void;
   selectionMode?: boolean;
   isSelected?: boolean;
   onToggleSelect?: (id: string) => void;
 }
 
-export default function DocumentCard({ doc, onPreview, onDelete, onDownload, onEdit, selectionMode, isSelected, onToggleSelect }: DocumentCardProps) {
+export default function DocumentCard({ doc, onPreview, onDelete, onDownload, onEdit, onShare, selectionMode, isSelected, onToggleSelect }: DocumentCardProps) {
   const [imageError, setImageError] = useState(false);
   
   const [{ isDragging }, drag] = useDrag(() => ({
@@ -248,6 +249,15 @@ export default function DocumentCard({ doc, onPreview, onDelete, onDownload, onE
               title="Download"
             >
               <Download className="w-3.5 h-3.5 text-gray-600 group-hover:text-gray-800 group-hover:scale-110 mx-auto transition-all" />
+            </button>
+          )}
+          {onShare && (
+            <button 
+              onClick={(e) => { e.stopPropagation(); onShare(doc.id); }}
+              className="flex-1 p-1.5 hover:bg-gray-50 hover:text-gray-800 transition-all group"
+              title="Share"
+            >
+              <Share2 className="w-3.5 h-3.5 text-gray-600 group-hover:text-gray-800 group-hover:scale-110 mx-auto transition-all" />
             </button>
           )}
         </div>
