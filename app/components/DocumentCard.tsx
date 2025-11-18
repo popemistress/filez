@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import Tag from './Tag';
-import { Eye, Download, Trash2, Edit, FileText, Share2 } from 'lucide-react';
+import FileIcon from './FileIcon';
+import { Eye, Download, Trash2, FileText, Share2, BookOpen, Edit, Lock, Unlock, FileEdit, Type, Tag } from 'lucide-react';
 import { useDrag } from 'react-dnd';
 
 export interface DocumentMetadata {
@@ -14,26 +14,56 @@ export interface DocumentMetadata {
   fileSize: number;
   createdAt?: string;
   documentType?: string;
-  tags?: string[];
   referenceNumber?: string;
   folderId?: string | null;
   isPublic?: boolean;
   shareToken?: string | null;
+  isEncrypted?: boolean;
 };
 
 interface DocumentCardProps {
   doc: DocumentMetadata;
   onPreview?: (id: string) => void;
+  onViewDocument?: (id: string) => void;
+  onViewImage?: (id: string) => void;
+  onViewPdf?: (id: string) => void;
+  onRead?: (id: string) => void;
+  onEditSpreadsheet?: (id: string) => void;
+  onEditCode?: (id: string) => void;
+  onEditText?: (id: string) => void;
+  onEditMindMap?: (id: string) => void;
   onDelete?: (id: string) => void;
   onDownload?: (id: string) => void;
-  onEdit?: (id: string) => void;
   onShare?: (id: string) => void;
+  onRename?: (id: string, currentName: string) => void;
   selectionMode?: boolean;
   isSelected?: boolean;
   onToggleSelect?: (id: string) => void;
+  folderPath?: string;
+  showFolderPath?: boolean;
 }
 
-export default function DocumentCard({ doc, onPreview, onDelete, onDownload, onEdit, onShare, selectionMode, isSelected, onToggleSelect }: DocumentCardProps) {
+export default function DocumentCard({
+  doc,
+  onPreview,
+  onViewDocument,
+  onViewImage,
+  onViewPdf,
+  onRead,
+  onEditSpreadsheet,
+  onEditCode,
+  onEditText,
+  onEditMindMap,
+  onDelete,
+  onDownload,
+  onShare,
+  onRename,
+  selectionMode,
+  isSelected,
+  onToggleSelect,
+  folderPath,
+  showFolderPath
+}: DocumentCardProps) {
   const [imageError, setImageError] = useState(false);
   
   const [{ isDragging }, drag] = useDrag(() => ({
@@ -68,30 +98,147 @@ export default function DocumentCard({ doc, onPreview, onDelete, onDownload, onE
            editableExtensions.some(ext => doc.name.toLowerCase().endsWith(ext));
   };
 
-  const getFileIcon = (fileType: string) => {
+  const isEpub = () => {
+    return doc.fileType.includes('epub') || doc.name.toLowerCase().endsWith('.epub');
+  };
+
+  const isImage = () => {
+    return doc.fileType.startsWith('image/') || 
+           ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'].some(ext => 
+             doc.name.toLowerCase().endsWith(ext)
+           );
+  };
+
+  const isDocViewerSupported = () => {
+    // DOC/DOCX files
+    if (doc.fileType.includes('word') || 
+        doc.fileType.includes('document') ||
+        doc.name.toLowerCase().endsWith('.doc') || 
+        doc.name.toLowerCase().endsWith('.docx')) {
+      return true;
+    }
+    
+    // XLS/XLSX files
+    if (doc.fileType.includes('sheet') ||
+        doc.fileType.includes('excel') ||
+        doc.name.toLowerCase().endsWith('.xls') ||
+        doc.name.toLowerCase().endsWith('.xlsx')) {
+      return true;
+    }
+    
+    // PowerPoint files (PPT/PPTX)
+    if (doc.fileType.includes('powerpoint') ||
+        doc.fileType.includes('presentation') ||
+        doc.name.toLowerCase().endsWith('.ppt') ||
+        doc.name.toLowerCase().endsWith('.pptx')) {
+      return true;
+    }
+    
+    // Text files
+    if (doc.fileType.includes('text/plain') ||
+        doc.name.toLowerCase().endsWith('.txt')) {
+      return true;
+    }
+    
+    // Video files (WEBM)
+    if (doc.fileType.includes('video/webm') ||
+        doc.name.toLowerCase().endsWith('.webm')) {
+      return true;
+    }
+    
+    return false;
+  };
+
+  const isPdf = () => {
+    return doc.fileType === 'application/pdf' || doc.name.toLowerCase().endsWith('.pdf');
+  };
+
+  const isSpreadsheet = () => {
+    return doc.fileType.includes('sheet') ||
+           doc.fileType.includes('excel') ||
+           doc.name.toLowerCase().endsWith('.xls') ||
+           doc.name.toLowerCase().endsWith('.xlsx');
+  };
+
+
+  const isCodeFile = () => {
+    const codeExtensions = ['.js', '.jsx', '.ts', '.tsx', '.py', '.java', '.cpp', '.c', '.cs', '.php', '.rb', '.go', '.rs', '.swift', '.kt', '.sql', '.html', '.css', '.scss', '.json', '.xml', '.yaml', '.yml', '.sh', '.bash', '.txt', '.md', '.markdown'];
+    return codeExtensions.some(ext => doc.name.toLowerCase().endsWith(ext));
+  };
+
+  const isTextFile = () => {
+    // Text files are now handled as code files for editing
+    return false;
+  };
+
+  const isMindMap = () => {
+    return doc.name.toLowerCase().endsWith('.mindmap') ||
+           doc.name.toLowerCase().endsWith('.map') ||
+           doc.documentType === 'Mind Map';
+  };
+
+  const shouldHideViewButton = () => {
+    // Hide view button for these file types
+    const hideViewExtensions = ['.sql', '.txt', '.md', '.markdown'];
+    return hideViewExtensions.some(ext => doc.name.toLowerCase().endsWith(ext));
+  };
+
+  const getFileIcon = (fileType: string, fileName: string) => {
+    const ext = fileName.toLowerCase();
+    
+    // Images
     if (fileType.startsWith("image/")) return "🖼️";
+    
+    // Videos
     if (fileType.startsWith("video/")) return "🎥";
+    
+    // PDF
     if (fileType === "application/pdf") return "📄";
+    
+    // EPUB - Electronic Book
+    if (fileType.includes("epub") || ext.endsWith(".epub")) return "📖";
+    
+    // Word Documents
+    if (ext.endsWith(".doc")) return "📄";
+    if (ext.endsWith(".docx") || fileType.includes("wordprocessingml")) return "📝";
     if (fileType.includes("word") || fileType.includes("document")) return "📝";
+    
+    // Excel Spreadsheets
+    if (ext.endsWith(".xls")) return "📊";
+    if (ext.endsWith(".xlsx") || fileType.includes("spreadsheetml")) return "📈";
     if (fileType.includes("sheet") || fileType.includes("excel")) return "📊";
+    
+    // Text Files
+    if (ext.endsWith(".txt") || fileType.includes("text/plain")) return "📃";
+    
+    // Markdown
+    if (ext.endsWith(".md") || ext.endsWith(".markdown")) return "⬇️";
+    
+    // PowerPoint
     if (fileType.includes("presentation") || fileType.includes("powerpoint")) return "📽️";
+    
+    // Default
     return "📎";
   };
 
-  const getFileTypeLabel = (fileType: string) => {
+  const getFileTypeLabel = (fileType: string, fileName: string) => {
     if (fileType === "application/pdf") return "PDF";
     if (fileType.includes("word")) return "DOCX";
     if (fileType.includes("sheet")) return "XLSX";
     if (fileType.includes("presentation")) return "PPTX";
+    if (fileType.includes("epub") || fileName.toLowerCase().endsWith(".epub")) return "EPUB";
     const parts = fileType.split("/");
     return parts[1]?.toUpperCase() || "FILE";
   };
 
-  const getTagVariant = (tag: string, index: number) => {
-    if (tag.toLowerCase() === 'inbox') return 'blue';
-    const variants = ['orange', 'purple', 'green', 'pink', 'indigo', 'neutral'] as const;
-    return variants[index % variants.length];
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   };
+
 
   const renderThumbnail = () => {
     if (doc.fileType.startsWith("image/") && !imageError) {
@@ -143,7 +290,7 @@ export default function DocumentCard({ doc, onPreview, onDelete, onDownload, onE
     } else {
       return (
         <div className="relative h-40 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden">
-          <FileText className="w-16 h-16 text-gray-400" />
+          <FileIcon fileName={doc.name} fileType={doc.fileType} size="lg" />
         </div>
       );
     }
@@ -169,16 +316,6 @@ export default function DocumentCard({ doc, onPreview, onDelete, onDownload, onE
         </div>
       )}
 
-      {/* Tags overlay on thumbnail */}
-      {doc.tags && doc.tags.length > 0 && (
-        <div className={`absolute ${selectionMode ? 'left-9' : 'left-1.5'} top-1.5 flex flex-col gap-1 z-10`}>
-          {doc.tags.slice(0, 3).map((tag, index) => (
-            <Tag key={index} variant={getTagVariant(tag, index)}>
-              {tag}
-            </Tag>
-          ))}
-        </div>
-      )}
 
       {/* Thumbnail with fixed aspect ratio - increased height by 50% */}
       <div className="relative w-full bg-gray-100" style={{ paddingTop: '78.75%' }}>
@@ -194,6 +331,16 @@ export default function DocumentCard({ doc, onPreview, onDelete, onDownload, onE
             {title}
           </h3>
 
+          {/* Folder path - shown when searching */}
+          {showFolderPath && folderPath && (
+            <div className="flex items-center gap-1 text-[10px] text-blue-600 mb-1">
+              <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+              </svg>
+              <span className="truncate">{folderPath}</span>
+            </div>
+          )}
+
           {/* Metadata row */}
           <div className="flex items-center justify-between text-[10px] text-gray-500 mt-1">
             <div className="flex items-center gap-1">
@@ -205,12 +352,36 @@ export default function DocumentCard({ doc, onPreview, onDelete, onDownload, onE
               </svg>
               <span>{date}</span>
             </div>
+            <div className="flex items-center gap-1">
+              <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+              <span>{formatFileSize(doc.fileSize)}</span>
+            </div>
           </div>
         </div>
 
         {/* Action buttons - bordered like in reference image */}
         <div className="mt-2 pt-2 border-t border-gray-200 flex items-center justify-center gap-0">
-          {onPreview && (
+          {isImage() && onViewImage && (
+            <button 
+              onClick={(e) => { e.stopPropagation(); onViewImage(doc.id); }}
+              className="flex-1 p-1.5 border-r border-gray-200 hover:bg-blue-50 hover:text-blue-600 transition-all group"
+              title="View Image"
+            >
+              <Eye className="w-3.5 h-3.5 text-gray-600 group-hover:text-blue-600 group-hover:scale-110 mx-auto transition-all" />
+            </button>
+          )}
+          {isPdf() && onViewPdf && (
+            <button 
+              onClick={(e) => { e.stopPropagation(); onViewPdf(doc.id); }}
+              className="flex-1 p-1.5 border-r border-gray-200 hover:bg-red-50 hover:text-red-600 transition-all group"
+              title="View PDF"
+            >
+              <Eye className="w-3.5 h-3.5 text-gray-600 group-hover:text-red-600 group-hover:scale-110 mx-auto transition-all" />
+            </button>
+          )}
+          {onPreview && !isEpub() && !isSpreadsheet() && !isMindMap() && !isDocViewerSupported() && !isPdf() && !isImage() && !shouldHideViewButton() && !isCodeFile() && (
             <button 
               onClick={(e) => { e.stopPropagation(); onPreview(doc.id); }}
               className="flex-1 p-1.5 border-r border-gray-200 hover:bg-blue-50 hover:text-blue-600 transition-all group"
@@ -219,13 +390,58 @@ export default function DocumentCard({ doc, onPreview, onDelete, onDownload, onE
               <Eye className="w-3.5 h-3.5 text-gray-600 group-hover:text-blue-600 group-hover:scale-110 mx-auto transition-all" />
             </button>
           )}
-          {isEditable() && onEdit && (
+          {isDocViewerSupported() && onViewDocument && !isImage() && (
             <button 
-              onClick={(e) => { e.stopPropagation(); onEdit(doc.id); }}
+              onClick={(e) => { e.stopPropagation(); onViewDocument(doc.id); }}
+              className="flex-1 p-1.5 border-r border-gray-200 hover:bg-blue-50 hover:text-blue-600 transition-all group"
+              title="View Document"
+            >
+              <Eye className="w-3.5 h-3.5 text-gray-600 group-hover:text-blue-600 group-hover:scale-110 mx-auto transition-all" />
+            </button>
+          )}
+          {isEpub() && onRead && (
+            <button 
+              onClick={(e) => { e.stopPropagation(); onRead(doc.id); }}
+              className="flex-1 p-1.5 border-r border-gray-200 hover:bg-purple-50 hover:text-purple-600 transition-all group"
+              title="Read"
+            >
+              <BookOpen className="w-3.5 h-3.5 text-gray-600 group-hover:text-purple-600 group-hover:scale-110 mx-auto transition-all" />
+            </button>
+          )}
+          {isSpreadsheet() && onEditSpreadsheet && (
+            <button 
+              onClick={(e) => { e.stopPropagation(); onEditSpreadsheet(doc.id); }}
               className="flex-1 p-1.5 border-r border-gray-200 hover:bg-green-50 hover:text-green-600 transition-all group"
-              title="Edit"
+              title="Edit Spreadsheet"
             >
               <Edit className="w-3.5 h-3.5 text-gray-600 group-hover:text-green-600 group-hover:scale-110 mx-auto transition-all" />
+            </button>
+          )}
+          {isCodeFile() && onEditCode && (
+            <button 
+              onClick={(e) => { e.stopPropagation(); onEditCode(doc.id); }}
+              className="flex-1 p-1.5 border-r border-gray-200 hover:bg-purple-50 hover:text-purple-600 transition-all group"
+              title="Edit Code"
+            >
+              <Edit className="w-3.5 h-3.5 text-gray-600 group-hover:text-purple-600 group-hover:scale-110 mx-auto transition-all" />
+            </button>
+          )}
+          {isMindMap() && onEditMindMap && (
+            <button 
+              onClick={(e) => { e.stopPropagation(); onEditMindMap(doc.id); }}
+              className="flex-1 p-1.5 border-r border-gray-200 hover:bg-indigo-50 hover:text-indigo-600 transition-all group"
+              title="Edit Mind Map"
+            >
+              <Edit className="w-3.5 h-3.5 text-gray-600 group-hover:text-indigo-600 group-hover:scale-110 mx-auto transition-all" />
+            </button>
+          )}
+          {isTextFile() && onEditText && (
+            <button 
+              onClick={(e) => { e.stopPropagation(); onEditText(doc.id); }}
+              className="flex-1 p-1.5 border-r border-gray-200 hover:bg-indigo-50 hover:text-indigo-600 transition-all group"
+              title="Edit Text"
+            >
+              <FileEdit className="w-3.5 h-3.5 text-gray-600 group-hover:text-indigo-600 group-hover:scale-110 mx-auto transition-all" />
             </button>
           )}
           {onDelete && (
@@ -254,10 +470,19 @@ export default function DocumentCard({ doc, onPreview, onDelete, onDownload, onE
           {onShare && (
             <button 
               onClick={(e) => { e.stopPropagation(); onShare(doc.id); }}
-              className="flex-1 p-1.5 hover:bg-gray-50 hover:text-gray-800 transition-all group"
+              className="flex-1 p-1.5 border-r border-gray-200 hover:bg-gray-50 hover:text-gray-800 transition-all group"
               title="Share"
             >
               <Share2 className="w-3.5 h-3.5 text-gray-600 group-hover:text-gray-800 group-hover:scale-110 mx-auto transition-all" />
+            </button>
+          )}
+          {onRename && (
+            <button 
+              onClick={(e) => { e.stopPropagation(); onRename(doc.id, doc.name); }}
+              className="flex-1 p-1.5 hover:bg-blue-50 hover:text-blue-600 transition-all group"
+              title="Rename"
+            >
+              <Tag className="w-3.5 h-3.5 text-gray-600 group-hover:text-blue-600 group-hover:scale-110 mx-auto transition-all" />
             </button>
           )}
         </div>

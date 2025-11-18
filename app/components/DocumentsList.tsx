@@ -3,7 +3,6 @@
 import React from 'react';
 import { Eye, Trash2, Download, Calendar, Share2 } from 'lucide-react';
 import { DocumentMetadata } from './DocumentCard';
-import Tag from './Tag';
 import { useDrag } from 'react-dnd';
 
 interface DocumentsListProps {
@@ -16,14 +15,11 @@ interface DocumentsListProps {
   selectedFiles?: Set<string>;
   onToggleSelect?: (id: string) => void;
   onToggleSelectAll?: () => void;
+  getFolderPath?: (folderId: string | null | undefined) => string;
+  showFolderPath?: boolean;
 }
 
-export default function DocumentsList({ documents, onPreview, onDelete, onDownload, onShare, selectionMode, selectedFiles, onToggleSelect, onToggleSelectAll }: DocumentsListProps) {
-  const getTagVariant = (tag: string, index: number) => {
-    const variants = ['blue', 'purple', 'orange', 'green', 'pink', 'indigo'] as const;
-    const hash = tag.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return variants[hash % variants.length];
-  };
+export default function DocumentsList({ documents, onPreview, onDelete, onDownload, onShare, selectionMode, selectedFiles, onToggleSelect, onToggleSelectAll, getFolderPath, showFolderPath }: DocumentsListProps) {
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'N/A';
@@ -32,6 +28,14 @@ export default function DocumentsList({ documents, onPreview, onDelete, onDownlo
       day: 'numeric', 
       year: 'numeric' 
     });
+  };
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   };
 
   const allSelected = documents.length > 0 && documents.every(doc => selectedFiles?.has(doc.id));
@@ -54,8 +58,9 @@ export default function DocumentsList({ documents, onPreview, onDelete, onDownlo
           </>
         )}
         <div className="flex-1 min-w-0">Name</div>
-        <div className="w-32 flex-shrink-0">Tags</div>
+        {showFolderPath && <div className="w-32 flex-shrink-0">Folder</div>}
         <div className="w-24 flex-shrink-0">Type</div>
+        <div className="w-20 flex-shrink-0">Size</div>
         <div className="w-28 flex-shrink-0">Date</div>
         <div className="w-32 flex-shrink-0 text-right">Actions</div>
       </div>
@@ -112,21 +117,24 @@ export default function DocumentsList({ documents, onPreview, onDelete, onDownlo
               </div>
             </div>
 
-            {/* Tags */}
-            <div className="w-32 flex-shrink-0 flex flex-wrap gap-1">
-              {doc.tags?.slice(0, 2).map((tag, index) => (
-                <Tag key={index} variant={getTagVariant(tag, index)}>
-                  {tag}
-                </Tag>
-              ))}
-              {doc.tags && doc.tags.length > 2 && (
-                <span className="text-xs text-gray-400">+{doc.tags.length - 2}</span>
-              )}
-            </div>
+            {/* Folder Path */}
+            {showFolderPath && (
+              <div className="w-32 flex-shrink-0">
+                <span className="text-sm text-blue-600 truncate">
+                  {getFolderPath ? getFolderPath(doc.folderId) : 'Root'}
+                </span>
+              </div>
+            )}
+
 
             {/* Type */}
             <div className="w-24 flex-shrink-0">
               <span className="text-sm text-gray-700">{doc.documentType || 'Document'}</span>
+            </div>
+
+            {/* Size */}
+            <div className="w-20 flex-shrink-0">
+              <span className="text-sm text-gray-600">{formatFileSize(doc.fileSize)}</span>
             </div>
 
             {/* Date */}

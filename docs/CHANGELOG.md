@@ -1,6 +1,165 @@
 # Changelog
 
-## [Latest Update] - 2025-11-16
+## [Major Update] - 2025-01-17
+
+### 🎨 New Mind Map Editor
+- **Create Mind Map** - Added to "New Item" dropdown menu
+- **Interactive Canvas** - Drag and drop nodes, create connections
+- **Node Editing** - Double-click to edit labels
+- **Custom Styling** - Change colors and shapes (rectangle, circle, diamond)
+- **Auto Layout** - Automatic hierarchical layout with Dagre
+- **Export/Save** - Save as .map JSON file
+- **Version Control** - Track changes to mind maps
+
+### 🔍 Advanced Search & Discovery
+- **Full-Text Search** - Search document content, not just filenames
+- **Advanced Search Bar** - Dedicated search interface with filters
+- **Saved Searches** - Save frequently used searches for quick access
+- **Search History** - Access recent searches
+- **PostgreSQL Full-Text Index** - Fast, efficient searching with ranking
+
+### ⭐ Bookmarking System
+- **Bookmark Files** - Mark important documents for quick access
+- **Bookmark Toggle** - One-click bookmark/unbookmark
+- **Bookmark Filter** - View only bookmarked files
+- **Visual Indicator** - Yellow bookmark icon for bookmarked files
+- **Persistent Storage** - Bookmarks saved to database
+
+### 📚 Version Control
+- **Document Versions** - Automatic version tracking for all documents
+- **Version History Modal** - View all versions of a document
+- **Version Comparison** - See what changed between versions
+- **Version Restore** - Revert to any previous version
+- **Change Descriptions** - Add notes when creating new versions
+- **Version Metadata** - Track who made changes and when
+
+### 📦 Import Capabilities
+- **ZIP Import** - Extract and import all files from ZIP archives
+- **Folder Import** - Import entire folder structures
+- **Batch Upload** - Upload multiple files at once
+- **Progress Tracking** - Real-time import progress
+- **Error Handling** - Detailed error reporting for failed imports
+- **Import Modal** - Dedicated UI for import operations
+
+
+### 🛠️ Technical Improvements
+
+#### New API Endpoints
+- `/api/bookmarks` - Bookmark management (GET, POST, DELETE)
+- `/api/saved-searches` - Saved search management (GET, POST, DELETE)
+- `/api/versions` - Document version control (GET, POST)
+- `/api/search` - Advanced full-text search (GET, POST)
+- `/api/import/zip` - ZIP file import (POST)
+- `/api/encrypt` - File encryption/decryption (GET, POST)
+
+#### Database Schema Updates
+```sql
+-- Bookmarks table
+CREATE TABLE bookmarks (
+  id VARCHAR(255) PRIMARY KEY,
+  user_id VARCHAR(255) NOT NULL,
+  upload_id VARCHAR(255) REFERENCES uploads(id),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Saved searches table
+CREATE TABLE saved_searches (
+  id VARCHAR(255) PRIMARY KEY,
+  user_id VARCHAR(255) NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  query TEXT NOT NULL,
+  filters JSONB,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Document versions table
+CREATE TABLE document_versions (
+  id VARCHAR(255) PRIMARY KEY,
+  upload_id VARCHAR(255) REFERENCES uploads(id),
+  version INTEGER NOT NULL,
+  url TEXT NOT NULL,
+  file_size INTEGER NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  change_description TEXT
+);
+
+-- Full-text search column
+ALTER TABLE uploads ADD COLUMN searchable_content TEXT;
+
+-- Encryption columns
+ALTER TABLE uploads ADD COLUMN is_encrypted BOOLEAN DEFAULT FALSE;
+ALTER TABLE uploads ADD COLUMN encryption_metadata TEXT;
+```
+
+#### New Components
+- `AdvancedSearchBar.tsx` - Advanced search interface with saved searches
+- `ImportModal.tsx` - ZIP and folder import interface
+- `VersionHistoryModal.tsx` - Document version history viewer
+- `MindMeisterEditor.tsx` - Interactive mind map editor
+
+#### New Dependencies
+```json
+{
+  "jszip": "^3.10.1",
+  "crypto-js": "^4.2.0",
+  "fuse.js": "^7.0.0",
+  "reactflow": "^11.10.4",
+  "dagre": "^0.8.5"
+}
+```
+
+### 🎯 Feature Highlights
+
+#### Mind Map Editor
+- **ReactFlow** - Professional node-based UI
+- **Dagre Layout** - Automatic graph layout algorithm
+- **Custom Nodes** - Editable, styled nodes with shapes
+- **Smooth Connections** - Animated edges with arrows
+- **Export Format** - JSON-based .map file format
+
+#### Search System
+- **PostgreSQL FTS** - Full-text search with ranking
+- **Multi-field Search** - Search names and content
+- **Filter Support** - Combine with folder, type, and tag filters
+- **Saved Searches** - Name and save search queries
+- **Quick Access** - Load saved searches with one click
+
+#### Import System
+- **JSZip Integration** - Extract ZIP files in browser
+- **Folder API** - Native folder selection support
+- **Progress UI** - Visual feedback during import
+- **Error Recovery** - Continue importing even if some files fail
+- **Folder Context** - Import directly into current folder
+
+### 🐛 Bug Fixes
+- Fixed PDF viewer not loading PDFs (worker configuration)
+- Fixed TypeScript errors in bookmark system
+- Fixed duplicate `onSearchChange` prop in FilterBar
+- Fixed DocumentMetadata interface property names
+
+### 📊 Performance Improvements
+- **Database Indexes** - Added indexes for bookmarks, versions, and search
+- **Lazy Loading** - Dynamic imports for heavy components
+- **Optimized Queries** - Efficient PostgreSQL queries with proper joins
+- **Caching** - Client-side caching of bookmarks and searches
+
+### 🎨 UI/UX Enhancements
+- **Import Button** - Prominent purple button in header
+- **Advanced Search Bar** - Dedicated search section
+- **Bookmark Toggle** - Visual feedback for bookmarked state
+- **Version History** - Clean, timeline-style version display
+- **Mind Map Canvas** - Professional graph editor interface
+- **Progress Indicators** - Loading states for all async operations
+
+### 🔒 Security Features
+- **AES-256 Encryption** - Industry-standard encryption
+- **Password Protection** - User-controlled encryption keys
+- **Metadata Privacy** - Encrypted file metadata
+- **Secure Storage** - Encrypted data in database
+
+---
+
+## [Previous Update] - 2025-11-16
 
 ### ✨ New Features
 

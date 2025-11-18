@@ -1,0 +1,6 @@
+=== Sync Check Started: Tue Nov 18 02:00:01 UTC 2025 ===
+HTTP Status: 500
+Response: {"success":false,"error":"Sync check failed","details":"column \"deleted_at\" does not exist"}
+✗ Sync check failed with status 500
+=== Sync Check Ended: Tue Nov 18 02:00:01 UTC 2025 ===
+

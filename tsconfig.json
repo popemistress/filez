@@ -23,5 +23,5 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", "jodit"]
+  "exclude": ["node_modules", "jodit", "**/e2e/**", "**/*.e2e-spec.ts", "map/**", "pdf/**"]
 }

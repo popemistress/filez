@@ -1,9 +1,8 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Download, ExternalLink } from 'lucide-react';
 import { DocumentMetadata } from './DocumentCard';
-import DocxViewer from './DocxViewer';
 
 interface EnhancedDocumentViewerProps {
   document: DocumentMetadata;
@@ -11,19 +10,15 @@ interface EnhancedDocumentViewerProps {
 }
 
 export default function EnhancedDocumentViewer({ document, onClose }: EnhancedDocumentViewerProps) {
+  const [streamUrl, setStreamUrl] = useState<string>('');
+
+  useEffect(() => {
+    // Use streaming endpoint for better performance
+    setStreamUrl(`/api/stream/${document.id}`);
+  }, [document.id]);
   const renderViewer = () => {
     const fileType = document.fileType.toLowerCase();
     
-    // Images
-    if (fileType.includes('image') || fileType.includes('png') || fileType.includes('jpg') || fileType.includes('jpeg') || fileType.includes('gif') || fileType.includes('webp')) {
-      return (
-        <img
-          src={document.url}
-          alt={document.name}
-          className="max-w-full max-h-full object-contain mx-auto"
-        />
-      );
-    }
     
     // PDF
     if (fileType.includes('pdf')) {
@@ -36,15 +31,20 @@ export default function EnhancedDocumentViewer({ document, onClose }: EnhancedDo
       );
     }
     
-    // Word Documents (.doc, .docx) - Use mammoth for better rendering
-    if (fileType.includes('word') || fileType.includes('document') || fileType.includes('msword') || fileType.includes('wordprocessingml')) {
-      return (
-        <DocxViewer url={document.url} fileName={document.name} />
-      );
-    }
     
     // Excel Documents (.xls, .xlsx)
     if (fileType.includes('excel') || fileType.includes('spreadsheet') || fileType.includes('sheet')) {
+      return (
+        <iframe
+          src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(document.url)}`}
+          className="w-full h-full"
+          title={document.name}
+        />
+      );
+    }
+    
+    // PowerPoint Documents (.ppt, .pptx)
+    if (fileType.includes('powerpoint') || fileType.includes('presentation') || fileType.includes('ppt')) {
       return (
         <iframe
           src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(document.url)}`}
@@ -137,7 +137,7 @@ export default function EnhancedDocumentViewer({ document, onClose }: EnhancedDo
         </div>
 
         {/* Content */}
-        <div className="h-[calc(100%-4rem)] overflow-auto bg-gray-100 flex items-center justify-center p-4">
+        <div className="flex-1 overflow-auto p-4 bg-gray-100">
           {renderViewer()}
         </div>
       </div>

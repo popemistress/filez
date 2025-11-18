@@ -6,7 +6,7 @@ const utapi = new UTApi();
 
 export async function POST(request: Request) {
   try {
-    const { url, name, fileType, fileSize, folderId, tags } = await request.json();
+    const { url, name, fileType, fileSize, folderId } = await request.json();
     
     // Download the file from the original URL
     const response = await fetch(url);
@@ -31,8 +31,8 @@ export async function POST(request: Request) {
     
     // Insert the new file record with the new URL
     await pool.query(
-      'INSERT INTO uploads (id, name, url, file_type, file_size, folder_id, tags) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-      [id, name, newUrl, fileType, fileSize, folderId || null, tags || []]
+      'INSERT INTO uploads (id, name, url, file_type, file_size, folder_id) VALUES ($1, $2, $3, $4, $5, $6)',
+      [id, name, newUrl, fileType, fileSize, folderId || null]
     );
     
     return NextResponse.json({ success: true, id, url: newUrl });

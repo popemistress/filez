@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Eye, Trash2, Download, Edit, Calendar, Share2 } from 'lucide-react';
+import { Eye, Trash2, Download, Calendar, Share2, BookOpen, Edit } from 'lucide-react';
 import { DocumentMetadata } from './DocumentCard';
-import Tag from './Tag';
+import FileIcon from './FileIcon';
 import { useDrag } from 'react-dnd';
 import Image from 'next/image';
 
@@ -16,10 +16,17 @@ interface DocumentPreviewListProps {
   selectionMode?: boolean;
   selectedFiles?: Set<string>;
   onToggleSelect?: (id: string) => void;
-  onEdit?: (id: string) => void;
+  onRead?: (id: string) => void;
+  onViewImage?: (id: string) => void;
+  onViewDocument?: (id: string) => void;
+  onViewPdf?: (id: string) => void;
+  onEditSpreadsheet?: (id: string) => void;
+  onEditCode?: (id: string) => void;
+  getFolderPath?: (folderId: string | null | undefined) => string;
+  showFolderPath?: boolean;
 }
 
-export default function DocumentPreviewList({ documents, onPreview, onDelete, onDownload, onShare, selectionMode, selectedFiles, onToggleSelect, onEdit }: DocumentPreviewListProps) {
+export default function DocumentPreviewList({ documents, onPreview, onDelete, onDownload, onShare, selectionMode, selectedFiles, onToggleSelect, onRead, onViewImage, onViewDocument, onViewPdf, onEditSpreadsheet, onEditCode, getFolderPath, showFolderPath }: DocumentPreviewListProps) {
   const [excerpts, setExcerpts] = useState<{ [key: string]: string }>({});
 
   // Extract text from documents
@@ -55,11 +62,6 @@ export default function DocumentPreviewList({ documents, onPreview, onDelete, on
     });
   }, [documents, excerpts]);
 
-  const getTagVariant = (tag: string, index: number) => {
-    const variants = ['blue', 'purple', 'orange', 'green', 'pink', 'indigo'] as const;
-    const hash = tag.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return variants[hash % variants.length];
-  };
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'N/A';
@@ -70,13 +72,56 @@ export default function DocumentPreviewList({ documents, onPreview, onDelete, on
     });
   };
 
-  const getFileIcon = (fileType: string) => {
-    if (fileType.includes('image')) return '🖼️';
-    if (fileType.includes('pdf')) return '📄';
-    if (fileType.includes('word') || fileType.includes('document')) return '📝';
-    if (fileType.includes('sheet') || fileType.includes('excel')) return '📊';
-    if (fileType.includes('epub')) return '📚';
-    return '📄';
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  };
+
+  const getFileIcon = (fileType: string, fileName: string) => {
+    const ext = fileName.toLowerCase();
+    
+    // Images
+    if (fileType.startsWith("image/")) return "🖼️";
+    
+    // Videos
+    if (fileType.startsWith("video/")) return "🎥";
+    
+    // Audio
+    if (fileType.startsWith("audio/")) return "🎵";
+    
+    // PDF
+    if (fileType === "application/pdf") return "📄";
+    
+    // EPUB - Electronic Book
+    if (fileType.includes("epub") || ext.endsWith(".epub")) return "📖";
+    
+    // Word Documents
+    if (ext.endsWith(".doc")) return "📄";
+    if (ext.endsWith(".docx") || fileType.includes("wordprocessingml")) return "📝";
+    if (fileType.includes("word") || fileType.includes("document")) return "📝";
+    
+    // Excel Spreadsheets
+    if (ext.endsWith(".xls")) return "📊";
+    if (ext.endsWith(".xlsx") || fileType.includes("spreadsheetml")) return "📈";
+    if (fileType.includes("sheet") || fileType.includes("excel")) return "📊";
+    
+    // Text Files
+    if (ext.endsWith(".txt") || fileType.includes("text/plain")) return "📃";
+    
+    // Markdown
+    if (ext.endsWith(".md") || ext.endsWith(".markdown")) return "⬇️";
+    
+    // PowerPoint
+    if (fileType.includes("presentation") || fileType.includes("powerpoint")) return "📽️";
+    
+    // Archives
+    if (fileType.includes('zip') || fileType.includes('compressed')) return '📦';
+    
+    // Default
+    return "📎";
   };
 
   const isEditable = (fileType: string, fileName: string) => {
@@ -98,6 +143,41 @@ export default function DocumentPreviewList({ documents, onPreview, onDelete, on
            editableExtensions.some(ext => fileName.toLowerCase().endsWith(ext));
   };
 
+  const isEpub = (fileType: string, fileName: string) => {
+    return fileType.includes('epub') || fileName.toLowerCase().endsWith('.epub');
+  };
+
+  const isPdf = (fileType: string, fileName: string) => {
+    return fileType === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf');
+  };
+
+
+  const isSpreadsheet = (fileType: string, fileName: string) => {
+    return fileType.includes('sheet') ||
+           fileType.includes('excel') ||
+           fileName.toLowerCase().endsWith('.xls') ||
+           fileName.toLowerCase().endsWith('.xlsx');
+  };
+
+  const isImage = (fileType: string, fileName: string) => {
+    return fileType.startsWith('image/') || 
+           ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'].some(ext => 
+             fileName.toLowerCase().endsWith(ext)
+           );
+  };
+
+  const isCodeFile = (fileType: string, fileName: string) => {
+    const codeExtensions = ['.js', '.jsx', '.ts', '.tsx', '.py', '.java', '.cpp', '.c', '.cs', '.php', '.rb', '.go', '.rs', '.swift', '.kt', '.sql', '.html', '.css', '.scss', '.json', '.xml', '.yaml', '.yml', '.sh', '.bash', '.txt', '.md', '.markdown'];
+    return codeExtensions.some(ext => fileName.toLowerCase().endsWith(ext));
+  };
+
+  const shouldHideViewButton = (fileType: string, fileName: string) => {
+    // Hide view button for these file types
+    const hideViewExtensions = ['.sql', '.txt', '.md', '.markdown'];
+    return hideViewExtensions.some(ext => fileName.toLowerCase().endsWith(ext));
+  };
+
+
   const generateExcerpt = (doc: DocumentMetadata) => {
     // Use extracted text if available
     if (excerpts[doc.id]) {
@@ -109,7 +189,7 @@ export default function DocumentPreviewList({ documents, onPreview, onDelete, on
       return 'PDF document - click View to see contents';
     } else if (doc.fileType.includes('text') || doc.fileType.includes('plain') || 
                doc.name.endsWith('.txt') || doc.name.endsWith('.md')) {
-      return 'Loading text content...';
+      return 'Text document - click View to see contents';
     } else if (doc.fileType.includes('word') || doc.fileType.includes('document')) {
       return 'Word document - click View to see contents';
     } else if (doc.fileType.includes('sheet') || doc.fileType.includes('excel')) {
@@ -164,27 +244,24 @@ export default function DocumentPreviewList({ documents, onPreview, onDelete, on
                       className="object-cover w-full h-full"
                     />
                   ) : (
-                    <div className="text-5xl">{getFileIcon(doc.fileType)}</div>
+                    <FileIcon fileName={doc.name} fileType={doc.fileType} size="lg" />
                   )}
                 </div>
 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
-                  {/* Title and Tags */}
+                  {/* Title */}
                   <div className="mb-2">
                     <h3 className="text-base font-semibold text-gray-900 truncate mb-1">
                       {doc.name}
                     </h3>
-                    {doc.tags && doc.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {doc.tags.slice(0, 3).map((tag, index) => (
-                          <Tag key={index} variant={getTagVariant(tag, index)}>
-                            {tag}
-                          </Tag>
-                        ))}
-                        {doc.tags.length > 3 && (
-                          <span className="text-xs text-gray-500">+{doc.tags.length - 3} more</span>
-                        )}
+                    {/* Folder path - shown when searching */}
+                    {showFolderPath && getFolderPath && (
+                      <div className="flex items-center gap-1 text-xs text-blue-600">
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                        </svg>
+                        <span className="truncate">{getFolderPath(doc.folderId)}</span>
                       </div>
                     )}
                   </div>
@@ -201,11 +278,37 @@ export default function DocumentPreviewList({ documents, onPreview, onDelete, on
                       {formatDate(doc.createdAt)}
                     </span>
                     <span>{doc.documentType}</span>
+                    <span className="flex items-center gap-1">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                      </svg>
+                      {formatFileSize(doc.fileSize)}
+                    </span>
                   </div>
 
                   {/* Actions */}
                   <div className="flex items-center gap-2">
-                    {onPreview && (
+                    {isImage(doc.fileType, doc.name) && onViewImage && (
+                      <button
+                        onClick={() => onViewImage(doc.id)}
+                        className="px-3 py-1.5 text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 rounded flex items-center gap-1.5 transition-colors"
+                        title="View Image"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        View Image
+                      </button>
+                    )}
+                    {isPdf(doc.fileType, doc.name) && onViewPdf && (
+                      <button
+                        onClick={() => onViewPdf(doc.id)}
+                        className="px-3 py-1.5 text-xs bg-red-100 hover:bg-red-200 text-red-700 rounded flex items-center gap-1.5 transition-colors"
+                        title="View PDF"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        View PDF
+                      </button>
+                    )}
+                    {onPreview && !isEpub(doc.fileType, doc.name) && !isImage(doc.fileType, doc.name) && !isPdf(doc.fileType, doc.name) && !shouldHideViewButton(doc.fileType, doc.name) && !isCodeFile(doc.fileType, doc.name) && (
                       <button
                         onClick={() => onPreview(doc.id)}
                         className="px-3 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 rounded flex items-center gap-1.5 transition-colors"
@@ -215,11 +318,31 @@ export default function DocumentPreviewList({ documents, onPreview, onDelete, on
                         View
                       </button>
                     )}
-                    {isEditable(doc.fileType, doc.name) && onEdit && (
+                    {isEpub(doc.fileType, doc.name) && onRead && (
                       <button
-                        onClick={() => onEdit(doc.id)}
-                        className="px-3 py-1.5 text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 rounded flex items-center gap-1.5 transition-colors"
-                        title="Edit"
+                        onClick={() => onRead(doc.id)}
+                        className="px-3 py-1.5 text-xs bg-purple-100 hover:bg-purple-200 text-purple-700 rounded flex items-center gap-1.5 transition-colors"
+                        title="Read"
+                      >
+                        <BookOpen className="w-3.5 h-3.5" />
+                        Read
+                      </button>
+                    )}
+                    {isSpreadsheet(doc.fileType, doc.name) && onEditSpreadsheet && (
+                      <button
+                        onClick={() => onEditSpreadsheet(doc.id)}
+                        className="px-3 py-1.5 text-xs bg-green-100 hover:bg-green-200 text-green-700 rounded flex items-center gap-1.5 transition-colors"
+                        title="Edit Spreadsheet"
+                      >
+                        <Edit className="w-3.5 h-3.5" />
+                        Edit
+                      </button>
+                    )}
+                    {isCodeFile(doc.fileType, doc.name) && onEditCode && (
+                      <button
+                        onClick={() => onEditCode(doc.id)}
+                        className="px-3 py-1.5 text-xs bg-purple-100 hover:bg-purple-200 text-purple-700 rounded flex items-center gap-1.5 transition-colors"
+                        title="Edit Code"
                       >
                         <Edit className="w-3.5 h-3.5" />
                         Edit
