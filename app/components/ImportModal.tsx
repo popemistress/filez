@@ -40,7 +40,7 @@ export default function ImportModal({ onClose, onImportComplete, currentFolderId
           });
           filesToUpload.push(extractedFile);
         } catch (error) {
-          console.error(`Error extracting ${filename}:`, error);
+          // Silent error handling
         }
       }
       
@@ -64,17 +64,14 @@ export default function ImportModal({ onClose, onImportComplete, currentFolderId
       
       // Simple and reliable approach: check completion every 500ms
       let hasRefreshed = false;
-      console.log(`Starting ZIP upload monitoring for ${taskIds.length} tasks:`, taskIds);
       
       const checkCompletion = () => {
         if (hasRefreshed) return;
         
-        console.log('Checking ZIP upload completion...');
         const allCompleted = uploadQueue.areTasksCompleted(taskIds);
         
         if (allCompleted) {
           hasRefreshed = true;
-          console.log('All ZIP uploads completed! Forcing browser refresh with reload(true)');
           // Force reload from server, bypassing cache
           try {
             // Try the legacy approach first (what you requested)
@@ -95,7 +92,6 @@ export default function ImportModal({ onClose, onImportComplete, currentFolderId
       // Clean up after 10 minutes max
       setTimeout(() => {
         if (!hasRefreshed) {
-          console.log('ZIP upload monitoring timed out after 10 minutes');
           clearInterval(pollInterval);
         }
       }, 600000);
@@ -106,7 +102,6 @@ export default function ImportModal({ onClose, onImportComplete, currentFolderId
       }, 1500);
       
     } catch (error) {
-      console.error('Error importing ZIP:', error);
       setResults({ error: 'Failed to import ZIP file' });
     } finally {
       setImporting(false);
@@ -154,17 +149,14 @@ export default function ImportModal({ onClose, onImportComplete, currentFolderId
       
       // Simple and reliable approach: check completion every 500ms
       let hasRefreshed = false;
-      console.log(`Starting upload monitoring for ${taskIds.length} tasks:`, taskIds);
       
       const checkCompletion = () => {
         if (hasRefreshed) return;
         
-        console.log('Checking upload completion...');
         const allCompleted = uploadQueue.areTasksCompleted(taskIds);
         
         if (allCompleted) {
           hasRefreshed = true;
-          console.log('All uploads completed! Forcing browser refresh with reload(true)');
           // Force reload from server, bypassing cache
           try {
             // Try the legacy approach first (what you requested)
@@ -185,7 +177,6 @@ export default function ImportModal({ onClose, onImportComplete, currentFolderId
       // Clean up after 10 minutes max
       setTimeout(() => {
         if (!hasRefreshed) {
-          console.log('Upload monitoring timed out after 10 minutes');
           clearInterval(pollInterval);
         }
       }, 600000);
@@ -196,7 +187,6 @@ export default function ImportModal({ onClose, onImportComplete, currentFolderId
       }, 1500);
       
     } catch (error) {
-      console.error('Error importing folder:', error);
       setResults({ error: 'Failed to import folder' });
     } finally {
       setImporting(false);

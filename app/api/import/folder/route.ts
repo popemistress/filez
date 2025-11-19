@@ -60,7 +60,6 @@ export async function POST(request: Request) {
           errors.push({ filename: file.name, error: 'Upload failed' });
         }
       } catch (error) {
-        console.error(`Error processing ${file.name}:`, error);
         errors.push({ filename: file.name, error: String(error) });
       }
     }
@@ -73,7 +72,6 @@ export async function POST(request: Request) {
       errorDetails: errors
     });
   } catch (error) {
-    console.error('Error importing folder:', error);
     return NextResponse.json({ error: "Failed to import folder" }, { status: 500 });
   }
 }

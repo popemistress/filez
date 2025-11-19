@@ -58,7 +58,6 @@ export async function PATCH(
             await utapi.deleteFiles(oldFileKey);
           }
         } catch (deleteError) {
-          console.error('Error deleting old file:', deleteError);
           // Continue even if delete fails
         }
 
@@ -67,7 +66,6 @@ export async function PATCH(
         throw new Error('Upload failed');
       }
     } catch (uploadError) {
-      console.error('Error with UploadThing sync:', uploadError);
       // Fallback: just update the name in database
       await pool.query(
         'UPDATE uploads SET name = $1 WHERE id = $2',
@@ -80,7 +78,6 @@ export async function PATCH(
       });
     }
   } catch (error) {
-    console.error('Error renaming file:', error);
     return NextResponse.json({ error: "Failed to rename file" }, { status: 500 });
   }
 }

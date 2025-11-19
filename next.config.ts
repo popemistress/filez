@@ -4,6 +4,8 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // Fix workspace root warning
+  outputFileTracingRoot: __dirname,
   images: {
     remotePatterns: [
       {
@@ -21,6 +23,16 @@ const nextConfig: NextConfig = {
     config.resolve.alias.encoding = false;
     return config;
   },
+  // Exclude docview folder from build
+  experimental: {
+    externalDir: true,
+  },
+  // Production optimizations
+  compress: true,
+  poweredByHeader: false,
+  generateEtags: true,
+  // Remove source maps in production
+  productionBrowserSourceMaps: false,
 };
 
 export default nextConfig;

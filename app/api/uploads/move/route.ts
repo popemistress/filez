@@ -64,14 +64,13 @@ export async function POST(request: Request) {
                 await utapi.deleteFiles(oldFileKey);
               }
             } catch (deleteError) {
-              console.error('Error deleting old file:', deleteError);
+              // Silent error handling for cleanup
             }
             
             return NextResponse.json({ success: true, newUrl });
           }
         }
       } catch (uploadError) {
-        console.error('Error with UploadThing sync:', uploadError);
         // Fallback: just update folder_id
       }
     }
@@ -84,7 +83,6 @@ export async function POST(request: Request) {
     
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error moving file:', error);
     return NextResponse.json({ error: "Failed to move file" }, { status: 500 });
   }
 }

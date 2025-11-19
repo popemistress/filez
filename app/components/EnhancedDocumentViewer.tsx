@@ -16,38 +16,16 @@ export default function EnhancedDocumentViewer({ document, onClose }: EnhancedDo
     // Use streaming endpoint for better performance
     setStreamUrl(`/api/stream/${document.id}`);
   }, [document.id]);
+
+
   const renderViewer = () => {
     const fileType = document.fileType.toLowerCase();
-    
     
     // PDF
     if (fileType.includes('pdf')) {
       return (
         <iframe
           src={`${document.url}#view=FitH`}
-          className="w-full h-full"
-          title={document.name}
-        />
-      );
-    }
-    
-    
-    // Excel Documents (.xls, .xlsx)
-    if (fileType.includes('excel') || fileType.includes('spreadsheet') || fileType.includes('sheet')) {
-      return (
-        <iframe
-          src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(document.url)}`}
-          className="w-full h-full"
-          title={document.name}
-        />
-      );
-    }
-    
-    // PowerPoint Documents (.ppt, .pptx)
-    if (fileType.includes('powerpoint') || fileType.includes('presentation') || fileType.includes('ppt')) {
-      return (
-        <iframe
-          src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(document.url)}`}
           className="w-full h-full"
           title={document.name}
         />

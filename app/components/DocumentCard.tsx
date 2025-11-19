@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import FileIcon from './FileIcon';
-import { Eye, Download, Trash2, FileText, Share2, BookOpen, Edit, Lock, Unlock, FileEdit, Type, Tag } from 'lucide-react';
+import { Eye, Download, Trash2, FileText, Share2, BookOpen, Edit, Lock, Unlock, FileEdit, Type } from 'lucide-react';
 import { useDrag } from 'react-dnd';
 
 export interface DocumentMetadata {
@@ -24,9 +24,9 @@ export interface DocumentMetadata {
 interface DocumentCardProps {
   doc: DocumentMetadata;
   onPreview?: (id: string) => void;
-  onViewDocument?: (id: string) => void;
   onViewImage?: (id: string) => void;
   onViewPdf?: (id: string) => void;
+  onViewOfficeDocument?: (id: string) => void;
   onRead?: (id: string) => void;
   onEditSpreadsheet?: (id: string) => void;
   onEditCode?: (id: string) => void;
@@ -46,9 +46,9 @@ interface DocumentCardProps {
 export default function DocumentCard({
   doc,
   onPreview,
-  onViewDocument,
   onViewImage,
   onViewPdf,
+  onViewOfficeDocument,
   onRead,
   onEditSpreadsheet,
   onEditCode,
@@ -109,10 +109,11 @@ export default function DocumentCard({
            );
   };
 
-  const isDocViewerSupported = () => {
+  const isOfficeDocument = () => {
     // DOC/DOCX files
     if (doc.fileType.includes('word') || 
         doc.fileType.includes('document') ||
+        doc.fileType.includes('wordprocessingml') ||
         doc.name.toLowerCase().endsWith('.doc') || 
         doc.name.toLowerCase().endsWith('.docx')) {
       return true;
@@ -121,6 +122,7 @@ export default function DocumentCard({
     // XLS/XLSX files
     if (doc.fileType.includes('sheet') ||
         doc.fileType.includes('excel') ||
+        doc.fileType.includes('spreadsheetml') ||
         doc.name.toLowerCase().endsWith('.xls') ||
         doc.name.toLowerCase().endsWith('.xlsx')) {
       return true;
@@ -129,11 +131,16 @@ export default function DocumentCard({
     // PowerPoint files (PPT/PPTX)
     if (doc.fileType.includes('powerpoint') ||
         doc.fileType.includes('presentation') ||
+        doc.fileType.includes('presentationml') ||
         doc.name.toLowerCase().endsWith('.ppt') ||
         doc.name.toLowerCase().endsWith('.pptx')) {
       return true;
     }
     
+    return false;
+  };
+
+  const isDocViewerSupported = () => {
     // Text files
     if (doc.fileType.includes('text/plain') ||
         doc.name.toLowerCase().endsWith('.txt')) {
@@ -381,20 +388,20 @@ export default function DocumentCard({
               <Eye className="w-3.5 h-3.5 text-gray-600 group-hover:text-red-600 group-hover:scale-110 mx-auto transition-all" />
             </button>
           )}
-          {onPreview && !isEpub() && !isSpreadsheet() && !isMindMap() && !isDocViewerSupported() && !isPdf() && !isImage() && !shouldHideViewButton() && !isCodeFile() && (
+          {isOfficeDocument() && onViewOfficeDocument && !isImage() && (
             <button 
-              onClick={(e) => { e.stopPropagation(); onPreview(doc.id); }}
+              onClick={(e) => { e.stopPropagation(); onViewOfficeDocument(doc.id); }}
               className="flex-1 p-1.5 border-r border-gray-200 hover:bg-blue-50 hover:text-blue-600 transition-all group"
-              title="View"
+              title="View Office Document"
             >
               <Eye className="w-3.5 h-3.5 text-gray-600 group-hover:text-blue-600 group-hover:scale-110 mx-auto transition-all" />
             </button>
           )}
-          {isDocViewerSupported() && onViewDocument && !isImage() && (
+          {onPreview && !isEpub() && !isSpreadsheet() && !isMindMap() && !isDocViewerSupported() && !isPdf() && !isOfficeDocument() && !isImage() && !shouldHideViewButton() && !isCodeFile() && (
             <button 
-              onClick={(e) => { e.stopPropagation(); onViewDocument(doc.id); }}
+              onClick={(e) => { e.stopPropagation(); onPreview(doc.id); }}
               className="flex-1 p-1.5 border-r border-gray-200 hover:bg-blue-50 hover:text-blue-600 transition-all group"
-              title="View Document"
+              title="View"
             >
               <Eye className="w-3.5 h-3.5 text-gray-600 group-hover:text-blue-600 group-hover:scale-110 mx-auto transition-all" />
             </button>
@@ -482,7 +489,7 @@ export default function DocumentCard({
               className="flex-1 p-1.5 hover:bg-blue-50 hover:text-blue-600 transition-all group"
               title="Rename"
             >
-              <Tag className="w-3.5 h-3.5 text-gray-600 group-hover:text-blue-600 group-hover:scale-110 mx-auto transition-all" />
+              <FileEdit className="w-3.5 h-3.5 text-gray-600 group-hover:text-blue-600 group-hover:scale-110 mx-auto transition-all" />
             </button>
           )}
         </div>

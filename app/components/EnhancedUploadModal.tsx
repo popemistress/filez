@@ -22,13 +22,8 @@ export default function EnhancedUploadModal({ onClose, onUploadComplete }: Uploa
   const [uploading, setUploading] = useState(false);
 
   const onDrop = useCallback((acceptedFiles: File[], rejectedFiles: any[]) => {
-    console.log('onDrop called with:', { acceptedFiles, rejectedFiles });
-    
     if (rejectedFiles.length > 0) {
-      console.log('Rejected files:', rejectedFiles);
-      rejectedFiles.forEach(rejection => {
-        console.log('Rejection reason:', rejection.errors);
-      });
+      // Handle rejected files silently
     }
     
     if (acceptedFiles.length + files.length > 10) {
@@ -37,7 +32,6 @@ export default function EnhancedUploadModal({ onClose, onUploadComplete }: Uploa
     }
 
     const newFiles: FileUploadState[] = acceptedFiles.map(file => {
-      console.log('Processing file:', file.name, file.type, file.size);
       return {
         file,
         progress: 0,
@@ -45,7 +39,6 @@ export default function EnhancedUploadModal({ onClose, onUploadComplete }: Uploa
       };
     });
 
-    console.log('Adding new files:', newFiles);
     setFiles(prev => [...prev, ...newFiles]);
   }, [files.length]);
 
@@ -83,7 +76,6 @@ export default function EnhancedUploadModal({ onClose, onUploadComplete }: Uploa
       // Add all files to background upload queue
       const taskIds = uploadQueue.addBulkUpload(files.map(f => f.file), null);
       
-      console.log(`Starting single file upload monitoring for ${taskIds.length} tasks:`, taskIds);
       
       // Simple and reliable approach: check completion every 500ms
       let hasRefreshed = false;
@@ -91,12 +83,10 @@ export default function EnhancedUploadModal({ onClose, onUploadComplete }: Uploa
       const checkCompletion = () => {
         if (hasRefreshed) return;
         
-        console.log('Checking single file upload completion...');
         const allCompleted = uploadQueue.areTasksCompleted(taskIds);
         
         if (allCompleted) {
           hasRefreshed = true;
-          console.log('All single file uploads completed! Forcing browser refresh with reload(true)');
           // Force reload from server, bypassing cache
           try {
             // Try the legacy approach first
@@ -117,7 +107,6 @@ export default function EnhancedUploadModal({ onClose, onUploadComplete }: Uploa
       // Clean up after 10 minutes max
       setTimeout(() => {
         if (!hasRefreshed) {
-          console.log('Single file upload monitoring timed out after 10 minutes');
           clearInterval(pollInterval);
         }
       }, 600000);
@@ -128,7 +117,6 @@ export default function EnhancedUploadModal({ onClose, onUploadComplete }: Uploa
       }, 1500);
       
     } catch (error) {
-      console.error('Upload error:', error);
       setUploading(false);
     }
   };

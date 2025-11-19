@@ -51,7 +51,6 @@ export async function POST(request: Request) {
           errors.push({ filename, error: 'Upload failed' });
         }
       } catch (error) {
-        console.error(`Error processing ${filename}:`, error);
         errors.push({ filename, error: String(error) });
       }
     }
@@ -64,7 +63,6 @@ export async function POST(request: Request) {
       errorDetails: errors
     });
   } catch (error) {
-    console.error('Error importing ZIP:', error);
     return NextResponse.json({ error: "Failed to import ZIP file" }, { status: 500 });
   }
 }

@@ -18,15 +18,15 @@ interface DocumentPreviewListProps {
   onToggleSelect?: (id: string) => void;
   onRead?: (id: string) => void;
   onViewImage?: (id: string) => void;
-  onViewDocument?: (id: string) => void;
   onViewPdf?: (id: string) => void;
+  onViewOfficeDocument?: (id: string) => void;
   onEditSpreadsheet?: (id: string) => void;
   onEditCode?: (id: string) => void;
   getFolderPath?: (folderId: string | null | undefined) => string;
   showFolderPath?: boolean;
 }
 
-export default function DocumentPreviewList({ documents, onPreview, onDelete, onDownload, onShare, selectionMode, selectedFiles, onToggleSelect, onRead, onViewImage, onViewDocument, onViewPdf, onEditSpreadsheet, onEditCode, getFolderPath, showFolderPath }: DocumentPreviewListProps) {
+export default function DocumentPreviewList({ documents, onPreview, onDelete, onDownload, onShare, selectionMode, selectedFiles, onToggleSelect, onRead, onViewImage, onViewPdf, onViewOfficeDocument, onEditSpreadsheet, onEditCode, getFolderPath, showFolderPath }: DocumentPreviewListProps) {
   const [excerpts, setExcerpts] = useState<{ [key: string]: string }>({});
 
   // Extract text from documents
@@ -98,10 +98,6 @@ export default function DocumentPreviewList({ documents, onPreview, onDelete, on
     // EPUB - Electronic Book
     if (fileType.includes("epub") || ext.endsWith(".epub")) return "📖";
     
-    // Word Documents
-    if (ext.endsWith(".doc")) return "📄";
-    if (ext.endsWith(".docx") || fileType.includes("wordprocessingml")) return "📝";
-    if (fileType.includes("word") || fileType.includes("document")) return "📝";
     
     // Excel Spreadsheets
     if (ext.endsWith(".xls")) return "📊";
@@ -125,9 +121,9 @@ export default function DocumentPreviewList({ documents, onPreview, onDelete, on
   };
 
   const isEditable = (fileType: string, fileName: string) => {
-    const editableTypes = ['word', 'document', 'sheet', 'excel', 'text', 'plain'];
+    const editableTypes = ['sheet', 'excel', 'text', 'plain'];
     const editableExtensions = [
-      '.docx', '.doc', '.xls', '.xlsx', '.txt', '.md',
+      '.xls', '.xlsx', '.txt', '.md',
       // Programming languages
       '.js', '.jsx', '.ts', '.tsx', '.py', '.java', '.c', '.cpp', '.h', '.hpp',
       '.cs', '.php', '.rb', '.go', '.rs', '.swift', '.kt', '.scala', '.r',
@@ -167,8 +163,34 @@ export default function DocumentPreviewList({ documents, onPreview, onDelete, on
   };
 
   const isCodeFile = (fileType: string, fileName: string) => {
-    const codeExtensions = ['.js', '.jsx', '.ts', '.tsx', '.py', '.java', '.cpp', '.c', '.cs', '.php', '.rb', '.go', '.rs', '.swift', '.kt', '.sql', '.html', '.css', '.scss', '.json', '.xml', '.yaml', '.yml', '.sh', '.bash', '.txt', '.md', '.markdown'];
+    const codeExtensions = ['.js', '.jsx', '.ts', '.tsx', '.py', '.java', '.cpp', '.c', '.h', '.css', '.html', '.xml', '.json', '.yaml', '.yml', '.sql'];
     return codeExtensions.some(ext => fileName.toLowerCase().endsWith(ext));
+  };
+
+  const isOfficeDocument = (fileType: string, fileName: string) => {
+    const lowerFileType = fileType.toLowerCase();
+    const lowerFileName = fileName.toLowerCase();
+    
+    return (
+      // Word documents
+      lowerFileType.includes('word') ||
+      lowerFileType.includes('document') ||
+      lowerFileType.includes('wordprocessingml') ||
+      lowerFileName.endsWith('.doc') ||
+      lowerFileName.endsWith('.docx') ||
+      // Excel documents
+      lowerFileType.includes('sheet') ||
+      lowerFileType.includes('excel') ||
+      lowerFileType.includes('spreadsheetml') ||
+      lowerFileName.endsWith('.xls') ||
+      lowerFileName.endsWith('.xlsx') ||
+      // PowerPoint documents
+      lowerFileType.includes('powerpoint') ||
+      lowerFileType.includes('presentation') ||
+      lowerFileType.includes('presentationml') ||
+      lowerFileName.endsWith('.ppt') ||
+      lowerFileName.endsWith('.pptx')
+    );
   };
 
   const shouldHideViewButton = (fileType: string, fileName: string) => {
@@ -190,8 +212,6 @@ export default function DocumentPreviewList({ documents, onPreview, onDelete, on
     } else if (doc.fileType.includes('text') || doc.fileType.includes('plain') || 
                doc.name.endsWith('.txt') || doc.name.endsWith('.md')) {
       return 'Text document - click View to see contents';
-    } else if (doc.fileType.includes('word') || doc.fileType.includes('document')) {
-      return 'Word document - click View to see contents';
     } else if (doc.fileType.includes('sheet') || doc.fileType.includes('excel')) {
       return 'Spreadsheet - click View to see contents';
     }
@@ -308,7 +328,17 @@ export default function DocumentPreviewList({ documents, onPreview, onDelete, on
                         View PDF
                       </button>
                     )}
-                    {onPreview && !isEpub(doc.fileType, doc.name) && !isImage(doc.fileType, doc.name) && !isPdf(doc.fileType, doc.name) && !shouldHideViewButton(doc.fileType, doc.name) && !isCodeFile(doc.fileType, doc.name) && (
+                    {isOfficeDocument(doc.fileType, doc.name) && onViewOfficeDocument && (
+                      <button
+                        onClick={() => onViewOfficeDocument(doc.id)}
+                        className="px-3 py-1.5 text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 rounded flex items-center gap-1.5 transition-colors"
+                        title="View Office Document"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        View Document
+                      </button>
+                    )}
+                    {onPreview && !isEpub(doc.fileType, doc.name) && !isImage(doc.fileType, doc.name) && !isPdf(doc.fileType, doc.name) && !isOfficeDocument(doc.fileType, doc.name) && !shouldHideViewButton(doc.fileType, doc.name) && !isCodeFile(doc.fileType, doc.name) && (
                       <button
                         onClick={() => onPreview(doc.id)}
                         className="px-3 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 rounded flex items-center gap-1.5 transition-colors"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import DocumentCard, { DocumentMetadata } from "./components/DocumentCard";
@@ -18,11 +18,11 @@ import BulkActionsBar from "./components/BulkActionsBar";
 import ShareFileModal from "./components/ShareFileModal";
 import EpubReaderModal from "./components/EpubReaderModal";
 import ImageViewer from "./components/ImageViewer";
-import DocViewerModal from "./components/DocViewer";
 import ImportModal from "./components/ImportModal";
 import VersionHistoryModal from "./components/VersionHistoryModal";
 import AdvancedSearchBar from "./components/AdvancedSearchBar";
 import UploadStatusIndicator from "./components/UploadStatusIndicator";
+import OfficeDocumentViewer from "./components/OfficeDocumentViewer";
 import dynamic from 'next/dynamic';
 import { ChevronRight } from "lucide-react";
 
@@ -63,49 +63,56 @@ export default function Home() {
   const [imageViewerVisible, setImageViewerVisible] = useState(false);
   const [imageViewerImages, setImageViewerImages] = useState<Array<{src: string, alt: string, downloadUrl?: string}>>([]);
   const [imageViewerIndex, setImageViewerIndex] = useState(0);
-  const [docViewerDocument, setDocViewerDocument] = useState<DocumentMetadata | null>(null);
   const [spreadsheetDocument, setSpreadsheetDocument] = useState<DocumentMetadata | null>(null);
   const [codeDocument, setCodeDocument] = useState<DocumentMetadata | null>(null);
   const [textDocument, setTextDocument] = useState<DocumentMetadata | null>(null);
   const [mindMapDocument, setMindMapDocument] = useState<DocumentMetadata | null>(null);
   const [showMindMapEditor, setShowMindMapEditor] = useState(false);
   const [pdfDocument, setPdfDocument] = useState<DocumentMetadata | null>(null);
+  const [officeDocument, setOfficeDocument] = useState<DocumentMetadata | null>(null);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showVersionHistory, setShowVersionHistory] = useState<DocumentMetadata | null>(null);
   const [renameDialog, setRenameDialog] = useState<{open: boolean, id: string, currentName: string}>({open: false, id: '', currentName: ''});
 
-  const fetchUploads = async () => {
+  const fetchUploads = useCallback(async () => {
     try {
       const res = await fetch("/api/uploads");
       const data = await res.json();
       
-      const transformedData: DocumentMetadata[] = data.map((upload: any, index: number) => ({
-        ...upload,
+      const transformedData = data.map((upload: any, index: number) => ({
+        id: upload.id,
+        name: upload.name,
+        url: upload.url,
+        fileType: upload.fileType,
+        fileSize: upload.fileSize,
+        createdAt: upload.createdAt,
+        folderId: upload.folderId,
         documentType: generateDocumentType(upload.fileType),
         referenceNumber: `#${1999 + index}`,
       }));
       
       setUploads(transformedData);
     } catch (error) {
-      console.error("Failed to fetch uploads:", error);
+      // Silent error handling
     }
-  };
+  }, []);
 
-  const fetchFolders = async () => {
+  const fetchFolders = useCallback(async () => {
     try {
       const res = await fetch("/api/folders");
       const data = await res.json();
       setFolders(data);
     } catch (error) {
-      console.error("Failed to fetch folders:", error);
+      // Silent error handling
     }
-  };
+  }, []);
 
   const generateDocumentType = (fileType: string): string => {
     if (fileType.includes('pdf')) return 'PDF';
     if (fileType.includes('image')) return 'Image';
-    if (fileType.includes('word') || fileType.includes('document')) return 'Word Document';
-    if (fileType.includes('sheet') || fileType.includes('excel')) return 'Spreadsheet';
+    if (fileType.includes('word') || fileType.includes('document') || fileType.includes('wordprocessingml')) return 'Word Document';
+    if (fileType.includes('sheet') || fileType.includes('excel') || fileType.includes('spreadsheetml')) return 'Spreadsheet';
+    if (fileType.includes('powerpoint') || fileType.includes('presentation') || fileType.includes('presentationml')) return 'Presentation';
     if (fileType.includes('epub')) return 'EPUB';
     return 'Document';
   };
@@ -200,8 +207,6 @@ export default function Home() {
   };
 
   const handleDelete = async (id: string) => {
-    console.log('handleDelete called with id:', id);
-    
     const confirmed = await confirm(
       'Delete Document',
       'Are you sure you want to delete this document? This action cannot be undone.',
@@ -214,11 +219,8 @@ export default function Home() {
     );
     
     if (!confirmed) {
-      console.log('User cancelled delete');
       return;
     }
-    
-    console.log('Sending DELETE request to /api/uploads/' + id);
     try {
       const res = await fetch(`/api/uploads/${id}`, { 
         method: 'DELETE',
@@ -228,26 +230,17 @@ export default function Home() {
         mode: 'cors',
         credentials: 'same-origin'
       });
-      console.log('Delete response status:', res.status);
       
       if (!res.ok) {
         const data = await res.json();
-        console.error('Delete failed:', data);
-        // TODO: Replace with error dialog
         alert(`Failed to delete file: ${data.error || 'Unknown error'}`);
         return;
       }
-      
-      const data = await res.json();
-      console.log('Response data:', data);
-      console.log('File deleted successfully');
       
       // Update local state immediately without refetching
       setUploads(prev => prev.filter(u => u.id !== id));
       
     } catch (error) {
-      console.error('Failed to delete document:', error);
-      // TODO: Replace with error dialog
       alert('Failed to delete file. Please try again.');
     }
   };
@@ -277,6 +270,13 @@ export default function Home() {
     }
   };
 
+  const handleViewOfficeDocument = (id: string) => {
+    const doc = uploads.find(u => u.id === id);
+    if (doc) {
+      setOfficeDocument(doc);
+    }
+  };
+
   const isImageFile = (doc: DocumentMetadata) => {
     return doc.fileType.includes('image') || 
            doc.name.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i);
@@ -292,12 +292,6 @@ export default function Home() {
     }
   };
 
-  const handleViewDocument = (id: string) => {
-    const doc = uploads.find(u => u.id === id);
-    if (doc) {
-      setDocViewerDocument(doc);
-    }
-  };
 
   const handleEditSpreadsheet = (id: string) => {
     const doc = uploads.find(u => u.id === id);
@@ -342,7 +336,6 @@ export default function Home() {
         alert('Failed to rename file');
       }
     } catch (error) {
-      console.error('Error renaming file:', error);
       alert('Failed to rename file');
     }
   };
@@ -387,13 +380,11 @@ export default function Home() {
         alert('Failed to save mind map');
       }
     } catch (error) {
-      console.error('Error saving mind map:', error);
       alert('Failed to save mind map');
     }
   };
 
   const handleCreateFolder = async (name: string, color?: string) => {
-    console.log('Creating folder:', name, 'with color:', color);
     try {
       const res = await fetch('/api/folders', {
         method: 'POST',
@@ -401,15 +392,12 @@ export default function Home() {
         body: JSON.stringify({ name, parentId: currentFolder, color })
       });
       if (res.ok) {
-        console.log('Folder created successfully');
         await fetchFolders();
       } else {
         const data = await res.json();
-        console.error('Failed to create folder:', data);
         alert('Failed to create folder: ' + (data.error || 'Unknown error'));
       }
     } catch (error) {
-      console.error('Failed to create folder:', error);
       alert('Failed to create folder. Please try again.');
     }
   };
@@ -431,13 +419,11 @@ export default function Home() {
         fetchUploads();
       }
     } catch (error) {
-      console.error('Failed to move file:', error);
+      // Silent error handling
     }
   };
 
   const handleDeleteFolder = async (folderId: string, fileCount: number) => {
-    console.log('handleDeleteFolder called with folderId:', folderId, 'fileCount:', fileCount);
-    
     const title = 'Delete Folder';
     const description = fileCount > 0 
       ? `This folder contains ${fileCount} file${fileCount > 1 ? 's' : ''}. Deleting this folder will also delete all files inside it. Are you sure you want to continue?`
@@ -454,13 +440,9 @@ export default function Home() {
       }
     );
     
-    console.log('Confirm result:', confirmed);
     if (!confirmed) {
-      console.log('User cancelled folder delete');
       return;
     }
-
-    console.log('Sending DELETE request to /api/folders/' + folderId);
     try {
       const res = await fetch(`/api/folders/${folderId}`, {
         method: 'DELETE',
@@ -471,18 +453,12 @@ export default function Home() {
         mode: 'cors',
         credentials: 'same-origin'
       });
-      console.log('Folder delete response status:', res.status);
       
       if (!res.ok) {
         const data = await res.json();
-        console.error('Folder delete failed:', data);
         alert('Failed to delete folder: ' + (data.error || 'Unknown error'));
         return;
       }
-      
-      const data = await res.json();
-      console.log('Folder delete response data:', data);
-      console.log('Folder deleted successfully');
       
       // Update local state immediately
       setFolders(prev => prev.filter(f => f.id !== folderId));
@@ -494,7 +470,6 @@ export default function Home() {
       await fetchUploads();
       
     } catch (error) {
-      console.error('Failed to delete folder:', error);
       alert('Failed to delete folder. Please try again.');
     }
   };
@@ -547,7 +522,6 @@ export default function Home() {
       setSelectionMode(false);
       await fetchUploads();
     } catch (error) {
-      console.error('Failed to delete files:', error);
       alert('Failed to delete some files. Please try again.');
     }
   };
@@ -577,9 +551,8 @@ export default function Home() {
         )
       );
     } catch (error) {
-      console.error('Failed to move files:', error);
       alert('Failed to move some files. Refreshing...');
-      await fetchUploads(); // Revert on error
+      await fetchUploads();
     }
   };
 
@@ -609,7 +582,6 @@ export default function Home() {
       setSelectionMode(false);
       await fetchUploads();
     } catch (error) {
-      console.error('Failed to copy files:', error);
       alert('Failed to copy some files. Please try again.');
     }
   };
@@ -774,8 +746,8 @@ export default function Home() {
                       onShare={handleShare}
                       onRead={handleRead}
                       onViewImage={handleViewImage}
-                      onViewDocument={handleViewDocument}
                       onViewPdf={handleViewPdf}
+                      onViewOfficeDocument={handleViewOfficeDocument}
                       onEditSpreadsheet={handleEditSpreadsheet}
                       onEditCode={handleEditCode}
                       onEditText={handleEditText}
@@ -795,8 +767,8 @@ export default function Home() {
                   onShare={handleShare}
                   onRead={handleRead}
                   onViewImage={handleViewImage}
-                  onViewDocument={handleViewDocument}
                   onViewPdf={handleViewPdf}
+                  onViewOfficeDocument={handleViewOfficeDocument}
                   onEditSpreadsheet={handleEditSpreadsheet}
                   onEditCode={handleEditCode}
                   getFolderPath={getFolderPath}
@@ -943,12 +915,6 @@ export default function Home() {
       />
 
 
-      {docViewerDocument && (
-        <DocViewerModal
-          document={docViewerDocument}
-          onClose={() => setDocViewerDocument(null)}
-        />
-      )}
 
       {/* pdfViewerDocument removed - using unified PDF viewer */}
 
@@ -958,7 +924,6 @@ export default function Home() {
           documentId={spreadsheetDocument.id}
           documentName={spreadsheetDocument.name}
           onSave={(data) => {
-            console.log('Spreadsheet saved:', data);
             fetchUploads();
           }}
           onClose={() => setSpreadsheetDocument(null)}
@@ -984,7 +949,6 @@ export default function Home() {
           documentName={showVersionHistory.name}
           onClose={() => setShowVersionHistory(null)}
           onRestore={(version) => {
-            console.log('Restoring version:', version);
             setShowVersionHistory(null);
           }}
         />
@@ -998,9 +962,7 @@ export default function Home() {
           fileType={codeDocument.fileType}
           onClose={() => setCodeDocument(null)}
           onSave={async (content) => {
-            // Save code file
-            console.log('Saving code:', content);
-            // TODO: Implement save API
+            // Save functionality to be implemented
           }}
         />
       )}
@@ -1012,9 +974,7 @@ export default function Home() {
           fileType={textDocument.fileType}
           onClose={() => setTextDocument(null)}
           onSave={async (content) => {
-            // Save text file
-            console.log('Saving text:', content);
-            // TODO: Implement save API
+            // Save functionality to be implemented
           }}
         />
       )}
@@ -1025,6 +985,14 @@ export default function Home() {
           documentUrl={pdfDocument.url}
           documentName={pdfDocument.name}
           onClose={() => setPdfDocument(null)}
+        />
+      )}
+
+      {/* Office Document Viewer */}
+      {officeDocument && (
+        <OfficeDocumentViewer
+          document={officeDocument}
+          onClose={() => setOfficeDocument(null)}
         />
       )}
 

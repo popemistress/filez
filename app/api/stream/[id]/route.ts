@@ -89,7 +89,6 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('Error streaming file:', error);
     return NextResponse.json({ error: "Failed to stream file" }, { status: 500 });
   }
 }

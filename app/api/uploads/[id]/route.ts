@@ -24,7 +24,6 @@ export async function PATCH(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error updating file:', error);
     return NextResponse.json({ error: "Failed to update file" }, { status: 500 });
   }
 }
@@ -61,7 +60,6 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting file:', error);
     return NextResponse.json({ error: "Failed to delete file" }, { status: 500 });
   }
 }
