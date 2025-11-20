@@ -10,7 +10,6 @@ async function ensureVersionsTable() {
       url TEXT NOT NULL,
       file_size INTEGER NOT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      created_by VARCHAR(255),
       change_description TEXT
     )
   `);
@@ -32,8 +31,7 @@ export async function GET(request: Request) {
     
     const result = await pool.query(`
       SELECT id, upload_id as "uploadId", version, url, file_size as "fileSize",
-             created_at as "createdAt", created_by as "createdBy", 
-             change_description as "changeDescription"
+             created_at as "createdAt", change_description as "changeDescription"
       FROM document_versions
       WHERE upload_id = $1
       ORDER BY version DESC
@@ -63,9 +61,9 @@ export async function POST(request: Request) {
     
     await pool.query(
       `INSERT INTO document_versions 
-       (id, upload_id, version, url, file_size, created_by, change_description) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [id, uploadId, newVersion, url, fileSize, 'default_user', changeDescription || '']
+       (id, upload_id, version, url, file_size, change_description) 
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [id, uploadId, newVersion, url, fileSize, changeDescription || '']
     );
     
     return NextResponse.json({ success: true, id, version: newVersion });

@@ -6,7 +6,7 @@ declare module 'mammoth' {
 
   export interface ConvertResult {
     value: string;
-    messages: any[];
+    messages: Record<string, unknown>[];
   }
 
   export function convertToHtml(options: ConvertToHtmlOptions): Promise<ConvertResult>;

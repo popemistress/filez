@@ -26,8 +26,8 @@ export async function POST(request: Request) {
       targetFolderId = newFolderId;
     }
     
-    const uploadedFiles: any[] = [];
-    const errors: any[] = [];
+    const uploadedFiles: Record<string, unknown>[] = [];
+    const errors: Record<string, unknown>[] = [];
     
     // Upload files in batches to UploadThing
     for (const file of files) {
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
       files: uploadedFiles,
       errorDetails: errors
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Failed to import folder" }, { status: 500 });
   }
 }

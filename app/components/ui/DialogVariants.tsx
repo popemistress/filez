@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment } from 'react'
+import React from 'react'
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
 import { AlertTriangle, X, Check, Info, Trash2 } from 'lucide-react'
 

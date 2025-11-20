@@ -18,8 +18,8 @@ export async function POST(request: Request) {
     const arrayBuffer = await zipFile.arrayBuffer();
     const zip = await JSZip.loadAsync(arrayBuffer);
     
-    const uploadedFiles: any[] = [];
-    const errors: any[] = [];
+    const uploadedFiles: Record<string, unknown>[] = [];
+    const errors: Record<string, unknown>[] = [];
     
     // Process each file in the ZIP
     for (const [filename, file] of Object.entries(zip.files)) {
@@ -62,7 +62,7 @@ export async function POST(request: Request) {
       files: uploadedFiles,
       errorDetails: errors
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Failed to import ZIP file" }, { status: 500 });
   }
 }

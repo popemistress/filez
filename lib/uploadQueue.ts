@@ -8,11 +8,11 @@ interface UploadTask {
   file: File;
   folderId?: string | null;
   onProgress?: (progress: number) => void;
-  onComplete?: (result: any) => void;
+  onComplete?: (result: Record<string, unknown>) => void;
   onError?: (error: Error) => void;
   status: 'pending' | 'uploading' | 'completed' | 'failed';
   progress: number;
-  result?: any;
+  result?: Record<string, unknown>;
   error?: Error;
 }
 

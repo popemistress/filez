@@ -1,0 +1,400 @@
+2025-11-20 18:28:21 +00:00: Error fetching saved searches: error: password authentication failed for user "yamz"
+2025-11-20 18:28:21 +00:00:     at async h (.next/server/app/api/saved-searches/route.js:1:1033)
+2025-11-20 18:28:21 +00:00:     at async i (.next/server/app/api/saved-searches/route.js:13:29)
+2025-11-20 18:28:21 +00:00:     at async k (.next/server/app/api/saved-searches/route.js:18:4433)
+2025-11-20 18:28:21 +00:00:     at async g (.next/server/app/api/saved-searches/route.js:18:5436)
+2025-11-20 18:28:21 +00:00:     at async x (.next/server/app/api/saved-searches/route.js:18:6558) {
+2025-11-20 18:28:21 +00:00:   length: 100,
+2025-11-20 18:28:21 +00:00:   severity: 'FATAL',
+2025-11-20 18:28:21 +00:00:   code: '28P01',
+2025-11-20 18:28:21 +00:00:   detail: undefined,
+2025-11-20 18:28:21 +00:00:   hint: undefined,
+2025-11-20 18:28:21 +00:00:   position: undefined,
+2025-11-20 18:28:21 +00:00:   internalPosition: undefined,
+2025-11-20 18:28:21 +00:00:   internalQuery: undefined,
+2025-11-20 18:28:21 +00:00:   where: undefined,
+2025-11-20 18:28:21 +00:00:   schema: undefined,
+2025-11-20 18:28:21 +00:00:   table: undefined,
+2025-11-20 18:28:21 +00:00:   column: undefined,
+2025-11-20 18:28:21 +00:00:   dataType: undefined,
+2025-11-20 18:28:21 +00:00:   constraint: undefined,
+2025-11-20 18:28:21 +00:00:   file: 'auth.c',
+2025-11-20 18:28:21 +00:00:   line: '329',
+2025-11-20 18:28:21 +00:00:   routine: 'auth_failed'
+2025-11-20 18:28:21 +00:00: }
+2025-11-20 18:28:21 +00:00: Error ensuring folders table: error: password authentication failed for user "yamz"
+2025-11-20 18:28:21 +00:00:     at async h (.next/server/app/api/folders/route.js:1:6197)
+2025-11-20 18:28:21 +00:00:     at async i (.next/server/app/api/folders/route.js:18:90)
+2025-11-20 18:28:21 +00:00:     at async k (.next/server/app/api/folders/route.js:1:3449)
+2025-11-20 18:28:21 +00:00:     at async g (.next/server/app/api/folders/route.js:1:4452)
+2025-11-20 18:28:21 +00:00:     at async x (.next/server/app/api/folders/route.js:1:5574) {
+2025-11-20 18:28:21 +00:00:   length: 100,
+2025-11-20 18:28:21 +00:00:   severity: 'FATAL',
+2025-11-20 18:28:21 +00:00:   code: '28P01',
+2025-11-20 18:28:21 +00:00:   detail: undefined,
+2025-11-20 18:28:21 +00:00:   hint: undefined,
+2025-11-20 18:28:21 +00:00:   position: undefined,
+2025-11-20 18:28:21 +00:00:   internalPosition: undefined,
+2025-11-20 18:28:21 +00:00:   internalQuery: undefined,
+2025-11-20 18:28:21 +00:00:   where: undefined,
+2025-11-20 18:28:21 +00:00:   schema: undefined,
+2025-11-20 18:28:21 +00:00:   table: undefined,
+2025-11-20 18:28:21 +00:00:   column: undefined,
+2025-11-20 18:28:21 +00:00:   dataType: undefined,
+2025-11-20 18:28:21 +00:00:   constraint: undefined,
+2025-11-20 18:28:21 +00:00:   file: 'auth.c',
+2025-11-20 18:28:21 +00:00:   line: '329',
+2025-11-20 18:28:21 +00:00:   routine: 'auth_failed'
+2025-11-20 18:28:21 +00:00: }
+2025-11-20 20:20:03 +00:00: Error ensuring folders table: error: password authentication failed for user "yamz"
+2025-11-20 20:20:03 +00:00:     at async h (.next/server/app/api/folders/route.js:1:6197)
+2025-11-20 20:20:03 +00:00:     at async i (.next/server/app/api/folders/route.js:18:90)
+2025-11-20 20:20:03 +00:00:     at async k (.next/server/app/api/folders/route.js:1:3449)
+2025-11-20 20:20:03 +00:00:     at async g (.next/server/app/api/folders/route.js:1:4452)
+2025-11-20 20:20:03 +00:00:     at async x (.next/server/app/api/folders/route.js:1:5574) {
+2025-11-20 20:20:03 +00:00:   length: 100,
+2025-11-20 20:20:03 +00:00:   severity: 'FATAL',
+2025-11-20 20:20:03 +00:00:   code: '28P01',
+2025-11-20 20:20:03 +00:00:   detail: undefined,
+2025-11-20 20:20:03 +00:00:   hint: undefined,
+2025-11-20 20:20:03 +00:00:   position: undefined,
+2025-11-20 20:20:03 +00:00:   internalPosition: undefined,
+2025-11-20 20:20:03 +00:00:   internalQuery: undefined,
+2025-11-20 20:20:03 +00:00:   where: undefined,
+2025-11-20 20:20:03 +00:00:   schema: undefined,
+2025-11-20 20:20:03 +00:00:   table: undefined,
+2025-11-20 20:20:03 +00:00:   column: undefined,
+2025-11-20 20:20:03 +00:00:   dataType: undefined,
+2025-11-20 20:20:03 +00:00:   constraint: undefined,
+2025-11-20 20:20:03 +00:00:   file: 'auth.c',
+2025-11-20 20:20:03 +00:00:   line: '329',
+2025-11-20 20:20:03 +00:00:   routine: 'auth_failed'
+2025-11-20 20:20:03 +00:00: }
+2025-11-20 20:20:03 +00:00: Error fetching saved searches: error: password authentication failed for user "yamz"
+2025-11-20 20:20:03 +00:00:     at async h (.next/server/app/api/saved-searches/route.js:1:1033)
+2025-11-20 20:20:03 +00:00:     at async i (.next/server/app/api/saved-searches/route.js:13:29)
+2025-11-20 20:20:03 +00:00:     at async k (.next/server/app/api/saved-searches/route.js:18:4433)
+2025-11-20 20:20:03 +00:00:     at async g (.next/server/app/api/saved-searches/route.js:18:5436)
+2025-11-20 20:20:03 +00:00:     at async x (.next/server/app/api/saved-searches/route.js:18:6558) {
+2025-11-20 20:20:03 +00:00:   length: 100,
+2025-11-20 20:20:03 +00:00:   severity: 'FATAL',
+2025-11-20 20:20:03 +00:00:   code: '28P01',
+2025-11-20 20:20:03 +00:00:   detail: undefined,
+2025-11-20 20:20:03 +00:00:   hint: undefined,
+2025-11-20 20:20:03 +00:00:   position: undefined,
+2025-11-20 20:20:03 +00:00:   internalPosition: undefined,
+2025-11-20 20:20:03 +00:00:   internalQuery: undefined,
+2025-11-20 20:20:03 +00:00:   where: undefined,
+2025-11-20 20:20:03 +00:00:   schema: undefined,
+2025-11-20 20:20:03 +00:00:   table: undefined,
+2025-11-20 20:20:03 +00:00:   column: undefined,
+2025-11-20 20:20:03 +00:00:   dataType: undefined,
+2025-11-20 20:20:03 +00:00:   constraint: undefined,
+2025-11-20 20:20:03 +00:00:   file: 'auth.c',
+2025-11-20 20:20:03 +00:00:   line: '329',
+2025-11-20 20:20:03 +00:00:   routine: 'auth_failed'
+2025-11-20 20:20:03 +00:00: }
+2025-11-20 20:20:05 +00:00: Error ensuring folders table: error: password authentication failed for user "yamz"
+2025-11-20 20:20:05 +00:00:     at async h (.next/server/app/api/folders/route.js:1:6197)
+2025-11-20 20:20:05 +00:00:     at async i (.next/server/app/api/folders/route.js:18:90)
+2025-11-20 20:20:05 +00:00:     at async k (.next/server/app/api/folders/route.js:1:3449)
+2025-11-20 20:20:05 +00:00:     at async g (.next/server/app/api/folders/route.js:1:4452)
+2025-11-20 20:20:05 +00:00:     at async x (.next/server/app/api/folders/route.js:1:5574) {
+2025-11-20 20:20:05 +00:00:   length: 100,
+2025-11-20 20:20:05 +00:00:   severity: 'FATAL',
+2025-11-20 20:20:05 +00:00:   code: '28P01',
+2025-11-20 20:20:05 +00:00:   detail: undefined,
+2025-11-20 20:20:05 +00:00:   hint: undefined,
+2025-11-20 20:20:05 +00:00:   position: undefined,
+2025-11-20 20:20:05 +00:00:   internalPosition: undefined,
+2025-11-20 20:20:05 +00:00:   internalQuery: undefined,
+2025-11-20 20:20:05 +00:00:   where: undefined,
+2025-11-20 20:20:05 +00:00:   schema: undefined,
+2025-11-20 20:20:05 +00:00:   table: undefined,
+2025-11-20 20:20:05 +00:00:   column: undefined,
+2025-11-20 20:20:05 +00:00:   dataType: undefined,
+2025-11-20 20:20:05 +00:00:   constraint: undefined,
+2025-11-20 20:20:05 +00:00:   file: 'auth.c',
+2025-11-20 20:20:05 +00:00:   line: '329',
+2025-11-20 20:20:05 +00:00:   routine: 'auth_failed'
+2025-11-20 20:20:05 +00:00: }
+2025-11-20 20:20:05 +00:00: Error fetching saved searches: error: password authentication failed for user "yamz"
+2025-11-20 20:20:05 +00:00:     at async h (.next/server/app/api/saved-searches/route.js:1:1033)
+2025-11-20 20:20:05 +00:00:     at async i (.next/server/app/api/saved-searches/route.js:13:29)
+2025-11-20 20:20:05 +00:00:     at async k (.next/server/app/api/saved-searches/route.js:18:4433)
+2025-11-20 20:20:05 +00:00:     at async g (.next/server/app/api/saved-searches/route.js:18:5436)
+2025-11-20 20:20:05 +00:00:     at async x (.next/server/app/api/saved-searches/route.js:18:6558) {
+2025-11-20 20:20:05 +00:00:   length: 100,
+2025-11-20 20:20:05 +00:00:   severity: 'FATAL',
+2025-11-20 20:20:05 +00:00:   code: '28P01',
+2025-11-20 20:20:05 +00:00:   detail: undefined,
+2025-11-20 20:20:05 +00:00:   hint: undefined,
+2025-11-20 20:20:05 +00:00:   position: undefined,
+2025-11-20 20:20:05 +00:00:   internalPosition: undefined,
+2025-11-20 20:20:05 +00:00:   internalQuery: undefined,
+2025-11-20 20:20:05 +00:00:   where: undefined,
+2025-11-20 20:20:05 +00:00:   schema: undefined,
+2025-11-20 20:20:05 +00:00:   table: undefined,
+2025-11-20 20:20:05 +00:00:   column: undefined,
+2025-11-20 20:20:05 +00:00:   dataType: undefined,
+2025-11-20 20:20:05 +00:00:   constraint: undefined,
+2025-11-20 20:20:05 +00:00:   file: 'auth.c',
+2025-11-20 20:20:05 +00:00:   line: '329',
+2025-11-20 20:20:05 +00:00:   routine: 'auth_failed'
+2025-11-20 20:20:05 +00:00: }
+2025-11-20 20:30:53 +00:00: ⚠️ [uploadthing][deprecated] `file.url` is deprecated and will be removed in uploadthing v9. Use `file.ufsUrl` instead.
+2025-11-20 20:30:53 +00:00: ⚠️ [uploadthing][deprecated] `file.appUrl` is deprecated and will be removed in uploadthing v9. Use `file.ufsUrl` instead.
+2025-11-20 20:30:53 +00:00: ⚠️ [uploadthing][deprecated] `file.url` is deprecated and will be removed in uploadthing v9. Use `file.ufsUrl` instead.
+2025-11-20 20:30:53 +00:00: ⚠️ [uploadthing][deprecated] `file.appUrl` is deprecated and will be removed in uploadthing v9. Use `file.ufsUrl` instead.
+2025-11-20 20:30:53 +00:00: ⚠️ [uploadthing][deprecated] `file.url` is deprecated and will be removed in uploadthing v9. Use `file.ufsUrl` instead.
+2025-11-20 20:30:53 +00:00: ⚠️ [uploadthing][deprecated] `file.appUrl` is deprecated and will be removed in uploadthing v9. Use `file.ufsUrl` instead.
+2025-11-20 20:30:54 +00:00: ⚠️ [uploadthing][deprecated] `file.url` is deprecated and will be removed in uploadthing v9. Use `file.ufsUrl` instead.
+2025-11-20 20:30:54 +00:00: ⚠️ [uploadthing][deprecated] `file.appUrl` is deprecated and will be removed in uploadthing v9. Use `file.ufsUrl` instead.
+2025-11-20 20:30:54 +00:00: ⚠️ [uploadthing][deprecated] `file.url` is deprecated and will be removed in uploadthing v9. Use `file.ufsUrl` instead.
+2025-11-20 20:30:54 +00:00: ⚠️ [uploadthing][deprecated] `file.appUrl` is deprecated and will be removed in uploadthing v9. Use `file.ufsUrl` instead.
+2025-11-20 20:30:54 +00:00: ⚠️ [uploadthing][deprecated] `file.url` is deprecated and will be removed in uploadthing v9. Use `file.ufsUrl` instead.
+2025-11-20 20:30:54 +00:00: ⚠️ [uploadthing][deprecated] `file.appUrl` is deprecated and will be removed in uploadthing v9. Use `file.ufsUrl` instead.
+2025-11-20 20:30:54 +00:00: ⚠️ [uploadthing][deprecated] `file.url` is deprecated and will be removed in uploadthing v9. Use `file.ufsUrl` instead.
+2025-11-20 20:30:54 +00:00: ⚠️ [uploadthing][deprecated] `file.appUrl` is deprecated and will be removed in uploadthing v9. Use `file.ufsUrl` instead.
+2025-11-20 20:30:57 +00:00: ⚠️ [uploadthing][deprecated] `file.url` is deprecated and will be removed in uploadthing v9. Use `file.ufsUrl` instead.
+2025-11-20 20:30:57 +00:00: ⚠️ [uploadthing][deprecated] `file.appUrl` is deprecated and will be removed in uploadthing v9. Use `file.ufsUrl` instead.
+2025-11-20 22:48:39 +00:00: Error fetching saved searches: error: password authentication failed for user "yamz"
+2025-11-20 22:48:39 +00:00:     at async h (.next/server/app/api/saved-searches/route.js:1:1033)
+2025-11-20 22:48:39 +00:00:     at async i (.next/server/app/api/saved-searches/route.js:13:29)
+2025-11-20 22:48:39 +00:00:     at async k (.next/server/app/api/saved-searches/route.js:18:4433)
+2025-11-20 22:48:39 +00:00:     at async g (.next/server/app/api/saved-searches/route.js:18:5436)
+2025-11-20 22:48:39 +00:00:     at async x (.next/server/app/api/saved-searches/route.js:18:6558) {
+2025-11-20 22:48:39 +00:00:   length: 100,
+2025-11-20 22:48:39 +00:00:   severity: 'FATAL',
+2025-11-20 22:48:39 +00:00:   code: '28P01',
+2025-11-20 22:48:39 +00:00:   detail: undefined,
+2025-11-20 22:48:39 +00:00:   hint: undefined,
+2025-11-20 22:48:39 +00:00:   position: undefined,
+2025-11-20 22:48:39 +00:00:   internalPosition: undefined,
+2025-11-20 22:48:39 +00:00:   internalQuery: undefined,
+2025-11-20 22:48:39 +00:00:   where: undefined,
+2025-11-20 22:48:39 +00:00:   schema: undefined,
+2025-11-20 22:48:39 +00:00:   table: undefined,
+2025-11-20 22:48:39 +00:00:   column: undefined,
+2025-11-20 22:48:39 +00:00:   dataType: undefined,
+2025-11-20 22:48:39 +00:00:   constraint: undefined,
+2025-11-20 22:48:39 +00:00:   file: 'auth.c',
+2025-11-20 22:48:39 +00:00:   line: '329',
+2025-11-20 22:48:39 +00:00:   routine: 'auth_failed'
+2025-11-20 22:48:39 +00:00: }
+2025-11-20 22:48:39 +00:00: Error ensuring folders table: error: password authentication failed for user "yamz"
+2025-11-20 22:48:39 +00:00:     at async h (.next/server/app/api/folders/route.js:1:6197)
+2025-11-20 22:48:39 +00:00:     at async i (.next/server/app/api/folders/route.js:18:90)
+2025-11-20 22:48:39 +00:00:     at async k (.next/server/app/api/folders/route.js:1:3449)
+2025-11-20 22:48:39 +00:00:     at async g (.next/server/app/api/folders/route.js:1:4452)
+2025-11-20 22:48:39 +00:00:     at async x (.next/server/app/api/folders/route.js:1:5574) {
+2025-11-20 22:48:39 +00:00:   length: 100,
+2025-11-20 22:48:39 +00:00:   severity: 'FATAL',
+2025-11-20 22:48:39 +00:00:   code: '28P01',
+2025-11-20 22:48:39 +00:00:   detail: undefined,
+2025-11-20 22:48:39 +00:00:   hint: undefined,
+2025-11-20 22:48:39 +00:00:   position: undefined,
+2025-11-20 22:48:39 +00:00:   internalPosition: undefined,
+2025-11-20 22:48:39 +00:00:   internalQuery: undefined,
+2025-11-20 22:48:39 +00:00:   where: undefined,
+2025-11-20 22:48:39 +00:00:   schema: undefined,
+2025-11-20 22:48:39 +00:00:   table: undefined,
+2025-11-20 22:48:39 +00:00:   column: undefined,
+2025-11-20 22:48:39 +00:00:   dataType: undefined,
+2025-11-20 22:48:39 +00:00:   constraint: undefined,
+2025-11-20 22:48:39 +00:00:   file: 'auth.c',
+2025-11-20 22:48:39 +00:00:   line: '329',
+2025-11-20 22:48:39 +00:00:   routine: 'auth_failed'
+2025-11-20 22:48:39 +00:00: }
+2025-11-20 22:51:36 +00:00: Error fetching saved searches: error: password authentication failed for user "yamz"
+2025-11-20 22:51:36 +00:00:     at async h (.next/server/app/api/saved-searches/route.js:1:1033)
+2025-11-20 22:51:36 +00:00:     at async i (.next/server/app/api/saved-searches/route.js:13:29)
+2025-11-20 22:51:36 +00:00:     at async k (.next/server/app/api/saved-searches/route.js:18:4433)
+2025-11-20 22:51:36 +00:00:     at async g (.next/server/app/api/saved-searches/route.js:18:5436)
+2025-11-20 22:51:36 +00:00:     at async x (.next/server/app/api/saved-searches/route.js:18:6558) {
+2025-11-20 22:51:36 +00:00:   length: 100,
+2025-11-20 22:51:36 +00:00:   severity: 'FATAL',
+2025-11-20 22:51:36 +00:00:   code: '28P01',
+2025-11-20 22:51:36 +00:00:   detail: undefined,
+2025-11-20 22:51:36 +00:00:   hint: undefined,
+2025-11-20 22:51:36 +00:00:   position: undefined,
+2025-11-20 22:51:36 +00:00:   internalPosition: undefined,
+2025-11-20 22:51:36 +00:00:   internalQuery: undefined,
+2025-11-20 22:51:36 +00:00:   where: undefined,
+2025-11-20 22:51:36 +00:00:   schema: undefined,
+2025-11-20 22:51:36 +00:00:   table: undefined,
+2025-11-20 22:51:36 +00:00:   column: undefined,
+2025-11-20 22:51:36 +00:00:   dataType: undefined,
+2025-11-20 22:51:36 +00:00:   constraint: undefined,
+2025-11-20 22:51:36 +00:00:   file: 'auth.c',
+2025-11-20 22:51:36 +00:00:   line: '329',
+2025-11-20 22:51:36 +00:00:   routine: 'auth_failed'
+2025-11-20 22:51:36 +00:00: }
+2025-11-20 22:51:36 +00:00: Error ensuring folders table: error: password authentication failed for user "yamz"
+2025-11-20 22:51:36 +00:00:     at async h (.next/server/app/api/folders/route.js:1:6197)
+2025-11-20 22:51:36 +00:00:     at async i (.next/server/app/api/folders/route.js:18:90)
+2025-11-20 22:51:36 +00:00:     at async k (.next/server/app/api/folders/route.js:1:3449)
+2025-11-20 22:51:36 +00:00:     at async g (.next/server/app/api/folders/route.js:1:4452)
+2025-11-20 22:51:36 +00:00:     at async x (.next/server/app/api/folders/route.js:1:5574) {
+2025-11-20 22:51:36 +00:00:   length: 100,
+2025-11-20 22:51:36 +00:00:   severity: 'FATAL',
+2025-11-20 22:51:36 +00:00:   code: '28P01',
+2025-11-20 22:51:36 +00:00:   detail: undefined,
+2025-11-20 22:51:36 +00:00:   hint: undefined,
+2025-11-20 22:51:36 +00:00:   position: undefined,
+2025-11-20 22:51:36 +00:00:   internalPosition: undefined,
+2025-11-20 22:51:36 +00:00:   internalQuery: undefined,
+2025-11-20 22:51:36 +00:00:   where: undefined,
+2025-11-20 22:51:36 +00:00:   schema: undefined,
+2025-11-20 22:51:36 +00:00:   table: undefined,
+2025-11-20 22:51:36 +00:00:   column: undefined,
+2025-11-20 22:51:36 +00:00:   dataType: undefined,
+2025-11-20 22:51:36 +00:00:   constraint: undefined,
+2025-11-20 22:51:36 +00:00:   file: 'auth.c',
+2025-11-20 22:51:36 +00:00:   line: '329',
+2025-11-20 22:51:36 +00:00:   routine: 'auth_failed'
+2025-11-20 22:51:36 +00:00: }
+2025-11-20 23:37:58 +00:00: Error fetching saved searches: error: password authentication failed for user "yamz"
+2025-11-20 23:37:58 +00:00:     at async h (.next/server/app/api/saved-searches/route.js:1:1033)
+2025-11-20 23:37:58 +00:00:     at async i (.next/server/app/api/saved-searches/route.js:13:29)
+2025-11-20 23:37:58 +00:00:     at async k (.next/server/app/api/saved-searches/route.js:18:4433)
+2025-11-20 23:37:58 +00:00:     at async g (.next/server/app/api/saved-searches/route.js:18:5436)
+2025-11-20 23:37:58 +00:00:     at async x (.next/server/app/api/saved-searches/route.js:18:6558) {
+2025-11-20 23:37:58 +00:00:   length: 100,
+2025-11-20 23:37:58 +00:00:   severity: 'FATAL',
+2025-11-20 23:37:58 +00:00:   code: '28P01',
+2025-11-20 23:37:58 +00:00:   detail: undefined,
+2025-11-20 23:37:58 +00:00:   hint: undefined,
+2025-11-20 23:37:58 +00:00:   position: undefined,
+2025-11-20 23:37:58 +00:00:   internalPosition: undefined,
+2025-11-20 23:37:58 +00:00:   internalQuery: undefined,
+2025-11-20 23:37:58 +00:00:   where: undefined,
+2025-11-20 23:37:58 +00:00:   schema: undefined,
+2025-11-20 23:37:58 +00:00:   table: undefined,
+2025-11-20 23:37:58 +00:00:   column: undefined,
+2025-11-20 23:37:58 +00:00:   dataType: undefined,
+2025-11-20 23:37:58 +00:00:   constraint: undefined,
+2025-11-20 23:37:58 +00:00:   file: 'auth.c',
+2025-11-20 23:37:58 +00:00:   line: '329',
+2025-11-20 23:37:58 +00:00:   routine: 'auth_failed'
+2025-11-20 23:37:58 +00:00: }
+2025-11-20 23:37:58 +00:00: Error ensuring folders table: error: password authentication failed for user "yamz"
+2025-11-20 23:37:58 +00:00:     at async h (.next/server/app/api/folders/route.js:1:6197)
+2025-11-20 23:37:58 +00:00:     at async i (.next/server/app/api/folders/route.js:18:90)
+2025-11-20 23:37:58 +00:00:     at async k (.next/server/app/api/folders/route.js:1:3449)
+2025-11-20 23:37:58 +00:00:     at async g (.next/server/app/api/folders/route.js:1:4452)
+2025-11-20 23:37:58 +00:00:     at async x (.next/server/app/api/folders/route.js:1:5574) {
+2025-11-20 23:37:58 +00:00:   length: 100,
+2025-11-20 23:37:58 +00:00:   severity: 'FATAL',
+2025-11-20 23:37:58 +00:00:   code: '28P01',
+2025-11-20 23:37:58 +00:00:   detail: undefined,
+2025-11-20 23:37:58 +00:00:   hint: undefined,
+2025-11-20 23:37:58 +00:00:   position: undefined,
+2025-11-20 23:37:58 +00:00:   internalPosition: undefined,
+2025-11-20 23:37:58 +00:00:   internalQuery: undefined,
+2025-11-20 23:37:58 +00:00:   where: undefined,
+2025-11-20 23:37:58 +00:00:   schema: undefined,
+2025-11-20 23:37:58 +00:00:   table: undefined,
+2025-11-20 23:37:58 +00:00:   column: undefined,
+2025-11-20 23:37:58 +00:00:   dataType: undefined,
+2025-11-20 23:37:58 +00:00:   constraint: undefined,
+2025-11-20 23:37:58 +00:00:   file: 'auth.c',
+2025-11-20 23:37:58 +00:00:   line: '329',
+2025-11-20 23:37:58 +00:00:   routine: 'auth_failed'
+2025-11-20 23:37:58 +00:00: }
+2025-11-20 23:38:09 +00:00: Error fetching saved searches: error: password authentication failed for user "yamz"
+2025-11-20 23:38:09 +00:00:     at async h (.next/server/app/api/saved-searches/route.js:1:1033)
+2025-11-20 23:38:09 +00:00:     at async i (.next/server/app/api/saved-searches/route.js:13:29)
+2025-11-20 23:38:09 +00:00:     at async k (.next/server/app/api/saved-searches/route.js:18:4433)
+2025-11-20 23:38:09 +00:00:     at async g (.next/server/app/api/saved-searches/route.js:18:5436)
+2025-11-20 23:38:09 +00:00:     at async x (.next/server/app/api/saved-searches/route.js:18:6558) {
+2025-11-20 23:38:09 +00:00:   length: 100,
+2025-11-20 23:38:09 +00:00:   severity: 'FATAL',
+2025-11-20 23:38:09 +00:00:   code: '28P01',
+2025-11-20 23:38:09 +00:00:   detail: undefined,
+2025-11-20 23:38:09 +00:00:   hint: undefined,
+2025-11-20 23:38:09 +00:00:   position: undefined,
+2025-11-20 23:38:09 +00:00:   internalPosition: undefined,
+2025-11-20 23:38:09 +00:00:   internalQuery: undefined,
+2025-11-20 23:38:09 +00:00:   where: undefined,
+2025-11-20 23:38:09 +00:00:   schema: undefined,
+2025-11-20 23:38:09 +00:00:   table: undefined,
+2025-11-20 23:38:09 +00:00:   column: undefined,
+2025-11-20 23:38:09 +00:00:   dataType: undefined,
+2025-11-20 23:38:09 +00:00:   constraint: undefined,
+2025-11-20 23:38:09 +00:00:   file: 'auth.c',
+2025-11-20 23:38:09 +00:00:   line: '329',
+2025-11-20 23:38:09 +00:00:   routine: 'auth_failed'
+2025-11-20 23:38:09 +00:00: }
+2025-11-20 23:38:09 +00:00: Error ensuring folders table: error: password authentication failed for user "yamz"
+2025-11-20 23:38:09 +00:00:     at async h (.next/server/app/api/folders/route.js:1:6197)
+2025-11-20 23:38:09 +00:00:     at async i (.next/server/app/api/folders/route.js:18:90)
+2025-11-20 23:38:09 +00:00:     at async k (.next/server/app/api/folders/route.js:1:3449)
+2025-11-20 23:38:09 +00:00:     at async g (.next/server/app/api/folders/route.js:1:4452)
+2025-11-20 23:38:09 +00:00:     at async x (.next/server/app/api/folders/route.js:1:5574) {
+2025-11-20 23:38:09 +00:00:   length: 100,
+2025-11-20 23:38:09 +00:00:   severity: 'FATAL',
+2025-11-20 23:38:09 +00:00:   code: '28P01',
+2025-11-20 23:38:09 +00:00:   detail: undefined,
+2025-11-20 23:38:09 +00:00:   hint: undefined,
+2025-11-20 23:38:09 +00:00:   position: undefined,
+2025-11-20 23:38:09 +00:00:   internalPosition: undefined,
+2025-11-20 23:38:09 +00:00:   internalQuery: undefined,
+2025-11-20 23:38:09 +00:00:   where: undefined,
+2025-11-20 23:38:09 +00:00:   schema: undefined,
+2025-11-20 23:38:09 +00:00:   table: undefined,
+2025-11-20 23:38:09 +00:00:   column: undefined,
+2025-11-20 23:38:09 +00:00:   dataType: undefined,
+2025-11-20 23:38:09 +00:00:   constraint: undefined,
+2025-11-20 23:38:09 +00:00:   file: 'auth.c',
+2025-11-20 23:38:09 +00:00:   line: '329',
+2025-11-20 23:38:09 +00:00:   routine: 'auth_failed'
+2025-11-20 23:38:09 +00:00: }
+2025-11-20 23:40:23 +00:00: Error fetching saved searches: error: password authentication failed for user "yamz"
+2025-11-20 23:40:23 +00:00:     at async h (.next/server/app/api/saved-searches/route.js:1:1033)
+2025-11-20 23:40:23 +00:00:     at async i (.next/server/app/api/saved-searches/route.js:13:29)
+2025-11-20 23:40:23 +00:00:     at async k (.next/server/app/api/saved-searches/route.js:18:4433)
+2025-11-20 23:40:23 +00:00:     at async g (.next/server/app/api/saved-searches/route.js:18:5436)
+2025-11-20 23:40:23 +00:00:     at async x (.next/server/app/api/saved-searches/route.js:18:6558) {
+2025-11-20 23:40:23 +00:00:   length: 100,
+2025-11-20 23:40:23 +00:00:   severity: 'FATAL',
+2025-11-20 23:40:23 +00:00:   code: '28P01',
+2025-11-20 23:40:23 +00:00:   detail: undefined,
+2025-11-20 23:40:23 +00:00:   hint: undefined,
+2025-11-20 23:40:23 +00:00:   position: undefined,
+2025-11-20 23:40:23 +00:00:   internalPosition: undefined,
+2025-11-20 23:40:23 +00:00:   internalQuery: undefined,
+2025-11-20 23:40:23 +00:00:   where: undefined,
+2025-11-20 23:40:23 +00:00:   schema: undefined,
+2025-11-20 23:40:23 +00:00:   table: undefined,
+2025-11-20 23:40:23 +00:00:   column: undefined,
+2025-11-20 23:40:23 +00:00:   dataType: undefined,
+2025-11-20 23:40:23 +00:00:   constraint: undefined,
+2025-11-20 23:40:23 +00:00:   file: 'auth.c',
+2025-11-20 23:40:23 +00:00:   line: '329',
+2025-11-20 23:40:23 +00:00:   routine: 'auth_failed'
+2025-11-20 23:40:23 +00:00: }
+2025-11-20 23:40:23 +00:00: Error ensuring folders table: error: password authentication failed for user "yamz"
+2025-11-20 23:40:23 +00:00:     at async h (.next/server/app/api/folders/route.js:1:6197)
+2025-11-20 23:40:23 +00:00:     at async i (.next/server/app/api/folders/route.js:18:90)
+2025-11-20 23:40:23 +00:00:     at async k (.next/server/app/api/folders/route.js:1:3449)
+2025-11-20 23:40:23 +00:00:     at async g (.next/server/app/api/folders/route.js:1:4452)
+2025-11-20 23:40:23 +00:00:     at async x (.next/server/app/api/folders/route.js:1:5574) {
+2025-11-20 23:40:23 +00:00:   length: 100,
+2025-11-20 23:40:23 +00:00:   severity: 'FATAL',
+2025-11-20 23:40:23 +00:00:   code: '28P01',
+2025-11-20 23:40:23 +00:00:   detail: undefined,
+2025-11-20 23:40:23 +00:00:   hint: undefined,
+2025-11-20 23:40:23 +00:00:   position: undefined,
+2025-11-20 23:40:23 +00:00:   internalPosition: undefined,
+2025-11-20 23:40:23 +00:00:   internalQuery: undefined,
+2025-11-20 23:40:23 +00:00:   where: undefined,
+2025-11-20 23:40:23 +00:00:   schema: undefined,
+2025-11-20 23:40:23 +00:00:   table: undefined,
+2025-11-20 23:40:23 +00:00:   column: undefined,
+2025-11-20 23:40:23 +00:00:   dataType: undefined,
+2025-11-20 23:40:23 +00:00:   constraint: undefined,
+2025-11-20 23:40:23 +00:00:   file: 'auth.c',
+2025-11-20 23:40:23 +00:00:   line: '329',
+2025-11-20 23:40:23 +00:00:   routine: 'auth_failed'
+2025-11-20 23:40:23 +00:00: }

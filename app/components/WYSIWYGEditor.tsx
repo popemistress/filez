@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Bold, Italic, Underline, Strikethrough, Code, Link, Image, Table,
   AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered,
   Quote, Heading1, Heading2, Heading3, Undo, Redo, Maximize, Minimize,
-  Eye, Save, X, ChevronDown, Palette, Type, Highlighter, Subscript,
-  Superscript, Minus, Check, Video, Music, FileCode, Smile, Download,
-  Upload, Paintbrush, Slash, FileText
+  Save, X, ChevronDown, Palette, Type, Highlighter, Subscript,
+  Superscript, Minus, Check, Video, Music, FileCode, Smile,
+  Upload, FileText
 } from 'lucide-react';
 
 interface WYSIWYGEditorProps {
@@ -49,7 +49,7 @@ export default function WYSIWYGEditor({
       editorRef.current.innerHTML = content;
       updateCounts();
     }
-  }, []);
+  }, [content, showSourceCode]);
 
   const updateCounts = () => {
     if (editorRef.current) {

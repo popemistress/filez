@@ -8,7 +8,7 @@ import DocumentsList from "./components/DocumentsList";
 import DocumentPreviewList from "./components/DocumentPreviewList";
 import FilterBar from "./components/FilterBar";
 import EnhancedDocumentViewer from "./components/EnhancedDocumentViewer";
-import { AlertDialog, ConfirmationDialog } from "./components/ui/DialogVariants";
+import { AlertDialog } from "./components/ui/DialogVariants";
 import RenameDialog from "./components/RenameDialog";
 import { useConfirmDialog } from "./hooks/useDialog";
 import EnhancedUploadModal from "./components/EnhancedUploadModal";
@@ -79,7 +79,7 @@ export default function Home() {
       const res = await fetch("/api/uploads");
       const data = await res.json();
       
-      const transformedData = data.map((upload: any, index: number) => ({
+      const transformedData = data.map((upload: Record<string, unknown>, index: number) => ({
         id: upload.id,
         name: upload.name,
         url: upload.url,
@@ -87,7 +87,7 @@ export default function Home() {
         fileSize: upload.fileSize,
         createdAt: upload.createdAt,
         folderId: upload.folderId,
-        documentType: generateDocumentType(upload.fileType),
+        documentType: generateDocumentType(upload.fileType as string),
         referenceNumber: `#${1999 + index}`,
       }));
       
@@ -360,7 +360,7 @@ export default function Home() {
     }
   };
 
-  const handleMindMapSave = async (data: any) => {
+  const handleMindMapSave = async (data: Record<string, unknown>) => {
     try {
       const response = await fetch('/api/mindmap/save', {
         method: 'POST',

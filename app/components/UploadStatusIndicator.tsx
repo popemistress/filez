@@ -4,14 +4,27 @@ import React, { useState, useEffect } from 'react';
 import { Upload, CheckCircle, XCircle, AlertCircle, X, RefreshCw } from 'lucide-react';
 import { uploadQueue } from '@/lib/uploadQueue';
 
+interface UploadTask {
+  id: string;
+  file: File;
+  folderId?: string | null;
+  onProgress?: (progress: number) => void;
+  onComplete?: (result: Record<string, unknown>) => void;
+  onError?: (error: Error) => void;
+  status: 'pending' | 'uploading' | 'completed' | 'failed';
+  progress: number;
+  result?: Record<string, unknown>;
+  error?: Error;
+}
+
 export default function UploadStatusIndicator() {
-  const [tasks, setTasks] = useState<any[]>([]);
+  const [tasks, setTasks] = useState<UploadTask[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
 
   useEffect(() => {
     const unsubscribe = uploadQueue.subscribe((updatedTasks) => {
-      setTasks(updatedTasks);
+      setTasks(updatedTasks as UploadTask[]);
       
       // Auto-show errors
       const hasErrors = updatedTasks.some(t => t.status === 'failed');

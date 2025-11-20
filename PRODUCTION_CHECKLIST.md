@@ -63,7 +63,7 @@ cp .env.production .env
 # Edit .env with your production values:
 # - DATABASE_URL
 # - UPLOADTHING_TOKEN
-# - NEXTAUTH_SECRET (if using auth)
+# - No authentication required
 ```
 
 ### 2. Database Setup

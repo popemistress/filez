@@ -240,12 +240,11 @@ ALTER TABLE uploads ADD COLUMN encryption_metadata TEXT;
 ### 🔐 Security Notes
 - All files are uploaded to UploadThing's secure CDN
 - File metadata is stored in PostgreSQL database
-- Files are accessible via direct URL (consider adding authentication if needed)
+- Files are accessible via direct URL
 
 ### 📝 Next Steps (Optional Enhancements)
 - Add Office document preview (requires external service)
 - Add file deletion functionality
 - Add file search/filter
 - Add file categories/tags
-- Add user authentication
 - Add download statistics
